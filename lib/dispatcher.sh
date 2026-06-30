@@ -55,7 +55,24 @@ dispatch_command() {
             run_plugins "$@"
 
             ;;
+        desktop)
 
+    case "${1:-}" in
+
+        install)
+
+            shift
+            run_desktop_install "$@"
+            ;;
+
+        *)
+
+            print_error "Usage: hcc desktop install <name>"
+            ;;
+
+    esac
+
+    ;;
         plugin)
 
             case "${1:-}" in
@@ -79,6 +96,7 @@ dispatch_command() {
             esac
 
             ;;
+            
 
         theme)
 
@@ -110,6 +128,7 @@ dispatch_command() {
             esac
 
             ;;
+            
 
         --version)
 
