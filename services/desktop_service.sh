@@ -28,33 +28,31 @@ desktop_service_install() {
 
     echo
 
-    ui_field "Pacman Packages" \
-        "$(desktop_plan_package_count)"
+    ui_field "Reboot" "$REBOOT_REQUIRED"
 
-    ui_field "AUR Packages" \
-        "$(desktop_plan_aur_count)"
+echo
 
-    ui_field "Directories" \
-        "$(desktop_plan_directory_count)"
+print_info "Generated Actions"
 
-    ui_field "Repositories" \
-        "$(desktop_plan_repository_count)"
+echo
 
-    ui_field "Reboot" \
-        "$REBOOT_REQUIRED"
+plan_reset
 
+desktop_generate_plan
+
+plan_render
     echo
 
-    print_info "Generated Actions"
+ print_info "Generated Actions"
 
-    echo
+echo
 
-    render_action "$(action_install_package hyprland)"
-    render_action "$(action_install_package kitty)"
-    render_action "$(action_install_aur quickshell-git)"
-    render_action "$(action_copy_directory .config)"
-    render_action "$(action_clone_repository \
-        "https://github.com/mailong2401/cartoon-shell.git" \
-        "~/.config/quickshell/cartoon-shell")"
+while read -r action
+do
 
+    [[ -z "$action" ]] && continue
+
+    render_action "$action"
+
+done < <(desktop_generate_plan)
 }

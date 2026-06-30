@@ -1,25 +1,44 @@
 #!/usr/bin/env bash
 
-desktop_plan_package_count() {
+desktop_generate_plan() {
 
-    wc -w <<< "$PACMAN_PACKAGES"
+    local package
 
-}
+    local repository
 
-desktop_plan_aur_count() {
+    local url
 
-    wc -w <<< "$AUR_PACKAGES"
+    local destination
 
-}
+    #
+    # Pacman
+    #
+    for package in $PACMAN_PACKAGES
+    do
+        plan_add "$(action_install_package "$package")"
+    done
 
-desktop_plan_directory_count() {
+    #
+    # AUR
+    #
+    for package in $AUR_PACKAGES
+    do
+        plan_add "$(action_install_aur "$package")"
+    done
 
-    wc -w <<< "$COPY_DIRECTORIES"
+    #
+    # Git repositories
+    #
+    while read -r repository
+    do
 
-}
+        [[ -z "$repository" ]] && continue
 
-desktop_plan_repository_count() {
+        IFS='|' read -r url destination <<< "$repository"
 
-    wc -l <<< "$GIT_REPOSITORIES"
+        plan_add "$(action_clone_repository "$url" "$destination")"\
+           
+
+    done <<< "$GIT_REPOSITORIES"
 
 }

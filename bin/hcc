@@ -48,6 +48,7 @@ source "$PROJECT_ROOT/modules/desktop_install.sh"
 
 source "$PROJECT_ROOT/lib/renderers/theme_renderer.sh"
 source "$PROJECT_ROOT/lib/actions.sh"
+source "$PROJECT_ROOT/lib/plan.sh"
 source "$PROJECT_ROOT/lib/renderers/action_renderer.sh"
 
 
