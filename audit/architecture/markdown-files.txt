@@ -1,0 +1,16 @@
+./analysis/mailong2401/cartoon-shell/README.md
+./analysis/mailong2401/dotfiles-hyprland/README.md
+./analysis/mailong2401/repository.md
+./analysis/README.md
+./audit/architecture/phase-01-inventory.md
+./docs/architecture/ARCHITECTURE.md
+./docs/theme-analysis/README.md
+./docs/theme-analysis/saad/dependencies.md
+./docs/theme-analysis/saad/filesystem.md
+./docs/theme-analysis/saad/install-flow.md
+./docs/theme-analysis/saad/mappings.md
+./docs/theme-analysis/saad/overview.md
+./docs/theme-analysis/saad/rollback.md
+./plugins/example/README.md
+./plugins/README.md
+./README.md

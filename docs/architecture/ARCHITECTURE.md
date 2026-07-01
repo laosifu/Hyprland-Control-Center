@@ -1,6 +1,26 @@
-# Hyprland Control Center Architecture
+# Hyprland Control Center
 
-## Layers
+## Architecture v1.0
+
+Status:
+
+Frozen
+
+---
+
+# Philosophy
+
+HCC is not a shell script.
+
+HCC is a modular desktop package manager for Hyprland environments.
+
+Every feature must be implemented as reusable components.
+
+Business logic must never live inside the CLI entry point.
+
+---
+
+# Layers
 
 CLI
 
@@ -22,60 +42,251 @@ Libraries
 
 ↓
 
-Renderers
-
-↓
-
-Executors
+Operating System
 
 ---
 
-## Responsibilities
+# Layer Responsibilities
 
-### bin/
+## bin/
 
-Entry point.
+Entry point only.
 
-### dispatcher
+Allowed:
 
-Route CLI command.
+- bootstrap
+- initialize
+- dispatch
 
-### modules/
+Forbidden:
 
-Receive CLI request.
+- filesystem
+- git
+- package install
+- parsing manifests
+
+---
+
+## dispatcher
+
+Routes CLI commands.
 
 No business logic.
 
-### services/
+---
 
-Business logic.
+## modules/
 
-### lib/
+Implements CLI commands.
 
-Reusable functions.
+Examples
 
-### renderers/
+doctor
 
-Only render output.
+theme install
 
-### analysis/
+plugin install
 
-External repository research.
+desktop install
 
-### themes/
+Responsibilities
 
-Desktop package manifests.
+- parse CLI
+- call services
+- print result
 
-### plugins/
+Must not
 
-Plugin manifests.
+- copy files
+- clone repositories
+- install packages
 
 ---
 
-## Rules
+## services/
 
-1. Modules must never contain business logic.
-2. Services may call libraries.
-3. Libraries must never print UI.
-4. Renderers must never install software.
-5. Executors never parse manifests.
+Workflow orchestration.
+
+Examples
+
+Desktop installation
+
+Theme installation
+
+Plugin installation
+
+Backup workflow
+
+A service combines multiple libraries.
+
+---
+
+## lib/
+
+Reusable engines.
+
+Examples
+
+filesystem
+
+manifest
+
+planner
+
+packages
+
+logger
+
+renderers
+
+A library must never call modules.
+
+A library must never know about CLI.
+
+---
+
+## themes/
+
+Theme definitions.
+
+Contains metadata only.
+
+---
+
+## plugins/
+
+Plugin definitions.
+
+Contains metadata only.
+
+---
+
+## analysis/
+
+Research only.
+
+Never executed.
+
+---
+
+## docs/
+
+Documentation only.
+
+Never executed.
+
+---
+
+# Dependency Rules
+
+Allowed
+
+bin
+
+↓
+
+dispatcher
+
+↓
+
+modules
+
+↓
+
+services
+
+↓
+
+libraries
+
+Forbidden
+
+library
+
+↓
+
+module
+
+library
+
+↓
+
+dispatcher
+
+service
+
+↓
+
+dispatcher
+
+---
+
+# Naming
+
+run_xxx()
+
+Module entry
+
+filesystem_xxx()
+
+Filesystem engine
+
+manifest_xxx()
+
+Manifest engine
+
+planner_xxx()
+
+Planner
+
+render_xxx()
+
+Renderer
+
+---
+
+# Bootstrap
+
+bin/hcc
+
+↓
+
+lib/bootstrap.sh
+
+↓
+
+services/bootstrap.sh
+
+↓
+
+modules/bootstrap.sh
+
+---
+
+# Testing
+
+Every new engine must be tested independently.
+
+Every service must be tested independently.
+
+Every module must be tested through hcc.
+
+---
+
+# Future
+
+Filesystem Engine
+
+Git Engine
+
+Package Engine
+
+Rollback Engine
+
+Executor
+
+Desktop Installer
+
+Theme Installer
+
+Plugin Installer

@@ -1,0 +1,12 @@
+modules
+modules/backup.sh
+modules/bootstrap.sh
+modules/cleanup.sh
+modules/desktop_install.sh
+modules/doctor.sh
+modules/inventory.sh
+modules/plugin_install.sh
+modules/plugins.sh
+modules/restore.sh
+modules/theme_install.sh
+modules/themes.sh

@@ -4,58 +4,28 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-source "$PROJECT_ROOT/lib/constants.sh"
-source "$PROJECT_ROOT/lib/colors.sh"
-source "$PROJECT_ROOT/lib/logger.sh"
-source "$PROJECT_ROOT/lib/output.sh"
-source "$PROJECT_ROOT/lib/ui.sh"
-source "$PROJECT_ROOT/lib/renderers/plugin_renderer.sh"
-source "$PROJECT_ROOT/lib/utils.sh"
-source "$PROJECT_ROOT/lib/config.sh"
-source "$PROJECT_ROOT/lib/detect.sh"
-source "$PROJECT_ROOT/lib/checks.sh"
-source "$PROJECT_ROOT/lib/plugins.sh"
-source "$PROJECT_ROOT/lib/themes.sh"
-source "$PROJECT_ROOT/lib/requirements.sh"
-source "$PROJECT_ROOT/lib/desktop_packages.sh"
-source "$PROJECT_ROOT/lib/desktop_planner.sh"
+#
+# Bootstrap
+#
+
+source "$PROJECT_ROOT/lib/bootstrap.sh"
+source "$PROJECT_ROOT/services/bootstrap.sh"
+source "$PROJECT_ROOT/modules/bootstrap.sh"
+
+#
+# Dispatcher
+#
+
 source "$PROJECT_ROOT/lib/dispatcher.sh"
-source "$PROJECT_ROOT/services/desktop_service.sh"
-source "$PROJECT_ROOT/lib/dependencies.sh"
-source "$PROJECT_ROOT/lib/filesystem.sh"
-source "$PROJECT_ROOT/lib/manifest.sh"
-source "$PROJECT_ROOT/lib/manifest_reader.sh"
 
-source "$PROJECT_ROOT/lib/backup.sh"
-
-source "$PROJECT_ROOT/modules/restore.sh"
-source "$PROJECT_ROOT/modules/inventory.sh"
-source "$PROJECT_ROOT/modules/plugins.sh"
-
-
-source "$PROJECT_ROOT/modules/doctor.sh"
-source "$PROJECT_ROOT/modules/cleanup.sh"
-source "$PROJECT_ROOT/modules/backup.sh"
-
-source "$PROJECT_ROOT/lib/backup.sh"
-
-source "$PROJECT_ROOT/modules/restore.sh"
-source "$PROJECT_ROOT/modules/plugin_install.sh"
-source "$PROJECT_ROOT/modules/themes.sh"
-source "$PROJECT_ROOT/modules/theme_install.sh"
-source "$PROJECT_ROOT/modules/desktop_install.sh"
-
-
-source "$PROJECT_ROOT/lib/renderers/theme_renderer.sh"
-source "$PROJECT_ROOT/lib/actions.sh"
-source "$PROJECT_ROOT/lib/plan.sh"
-source "$PROJECT_ROOT/lib/renderers/action_renderer.sh"
-
+#
+# Startup
+#
 
 load_config
 
 log_info "Starting HCC..."
 
-VERSION="$(cat "$PROJECT_ROOT/VERSION")"
+VERSION="$(<"$PROJECT_ROOT/VERSION")"
 
 dispatch_command "$@"
