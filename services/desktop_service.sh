@@ -28,6 +28,23 @@ desktop_render_plan() {
 
     echo
 }
+desktop_confirm_execution() {
+    echo
+    read -rp "Continue installation? [y/N]: " answer
+
+    case "$answer" in
+        [Yy]|[Yy][Ee][Ss])
+            return 0
+            ;;
+        *)
+            print_warning "Installation cancelled."
+            return 1
+            ;;
+    esac
+}
+desktop_execute_plan() {
+    print_info "Execution engine not implemented yet."
+}
 desktop_service_install() {
 
     local desktop="$1"
@@ -51,6 +68,11 @@ desktop_service_install() {
     desktop_render_summary
 
     desktop_render_plan
+    if ! desktop_confirm_execution; then
+    return 0
+    fi
+
+    desktop_execute_plan
     echo
 
 }
