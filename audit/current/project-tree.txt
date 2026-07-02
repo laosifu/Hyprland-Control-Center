@@ -1,0 +1,91 @@
+.
+├── analysis
+│   ├── mailong2401
+│   └── README.md
+├── audit
+│   ├── architecture
+│   ├── bash-files-v2.txt
+│   ├── current
+│   ├── lib-files-v2.txt
+│   ├── module-files-v2.txt
+│   ├── project-tree-v2.txt
+│   └── service-files-v2.txt
+├── bin
+│   └── hcc
+├── config
+│   └── default.conf
+├── desktop-packages
+│   ├── example
+│   └── mailong2401
+├── docs
+│   ├── adr
+│   ├── architecture
+│   ├── roadmap
+│   ├── sprints
+│   └── theme-analysis
+├── icons
+├── launcher
+├── lib
+│   ├── action_service.sh
+│   ├── actions.sh
+│   ├── backup.sh
+│   ├── bootstrap.sh
+│   ├── checks.sh
+│   ├── colors.sh
+│   ├── config.sh
+│   ├── constants.sh
+│   ├── dependencies.sh
+│   ├── desktop_packages.sh
+│   ├── desktop_planner.sh
+│   ├── detect.sh
+│   ├── dispatcher.sh
+│   ├── doctor
+│   ├── filesystem.sh
+│   ├── logger.sh
+│   ├── manifest_reader.sh
+│   ├── manifest.sh
+│   ├── output.sh
+│   ├── plan.sh
+│   ├── plugins.sh
+│   ├── renderers
+│   ├── requirements.sh
+│   ├── themes.sh
+│   ├── ui.sh
+│   └── utils.sh
+├── LICENSE
+├── logs
+│   └── hcc.log
+├── modules
+│   ├── backup.sh
+│   ├── bootstrap.sh
+│   ├── cleanup.sh
+│   ├── desktop_install.sh
+│   ├── doctor.sh
+│   ├── inventory.sh
+│   ├── plugin_install.sh
+│   ├── plugins.sh
+│   ├── restore.sh
+│   ├── theme_install.sh
+│   └── themes.sh
+├── plugins
+│   ├── example
+│   └── README.md
+├── PROJECT_STATE.md
+├── README.md
+├── services
+│   ├── bootstrap.sh
+│   ├── dependency_service.sh
+│   ├── deployment_service.sh
+│   ├── desktop_service.sh
+│   ├── filesystem_service.sh
+│   ├── git_service.sh
+│   ├── hook_service.sh
+│   └── package_service.sh
+├── tests
+│   ├── assert.sh
+│   └── run-tests.sh
+├── themes
+│   └── example
+└── VERSION
+
+30 directories, 59 files

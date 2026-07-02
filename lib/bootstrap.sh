@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+if [[ -z "${PROJECT_ROOT:-}" ]]; then
+
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+fi
 
 #
 # Core
@@ -43,6 +48,11 @@ source "$PROJECT_ROOT/lib/desktop_packages.sh"
 
 source "$PROJECT_ROOT/lib/actions.sh"
 source "$PROJECT_ROOT/lib/plan.sh"
+source "$PROJECT_ROOT/lib/execution_context.sh"
+source "$PROJECT_ROOT/lib/privilege.sh"
+source "$PROJECT_ROOT/lib/command_runner.sh"
+source "$PROJECT_ROOT/lib/plan_executor.sh"
+source "$PROJECT_ROOT/lib/action_dispatcher.sh"
 source "$PROJECT_ROOT/lib/desktop_planner.sh"
 
 #
@@ -58,3 +68,8 @@ source "$PROJECT_ROOT/lib/backup.sh"
 source "$PROJECT_ROOT/lib/renderers/plugin_renderer.sh"
 source "$PROJECT_ROOT/lib/renderers/theme_renderer.sh"
 source "$PROJECT_ROOT/lib/renderers/action_renderer.sh"
+#
+# Actions
+#
+source "$PROJECT_ROOT/lib/action_types.sh"
+source "$PROJECT_ROOT/lib/action_engine.sh"

@@ -2,20 +2,62 @@
 
 filesystem_copy_directory() {
 
+    local dry_run=false
+    local force=false
+    local backup=false
+    local verbose=false
+
+    while [[ $# -gt 0 ]]; do
+
+        case "$1" in
+
+            --dry-run)
+
+                dry_run=true
+                shift
+                ;;
+
+            --force)
+
+                force=true
+                shift
+                ;;
+
+            --backup)
+
+                backup=true
+                shift
+                ;;
+
+            --verbose)
+
+                verbose=true
+                shift
+                ;;
+
+            *)
+
+                break
+                ;;
+
+        esac
+
+    done
+
     local source="$1"
 
     local destination="$2"
 
-    if [[ ! -d "$source" ]]; then
+    echo "source=$source"
 
-        print_error "Directory not found: $source"
+    echo "destination=$destination"
 
-        return 1
+    echo "dry_run=$dry_run"
 
-    fi
+    echo "force=$force"
 
-    mkdir -p "$destination"
+    echo "backup=$backup"
 
-    cp -R "$source" "$destination"
+    echo "verbose=$verbose"
 
 }

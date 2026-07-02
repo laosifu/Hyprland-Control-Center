@@ -19,16 +19,21 @@ plan_size() {
     echo "${#PLAN_ACTIONS[@]}"
 
 }
+plan_foreach() {
 
-plan_render() {
+    local callback="$1"
 
     local action
 
     for action in "${PLAN_ACTIONS[@]}"
     do
-
-        render_action "$action"
-
+        "$callback" "$action"
     done
+
+}
+
+plan_render() {
+
+    plan_foreach render_action
 
 }
