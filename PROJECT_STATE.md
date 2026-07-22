@@ -312,3 +312,20 @@ Do not replace working pipelines.
 Refactor incrementally.
 
 Every architectural decision must preserve Desktop Install functionality.
+Manifest terminology
+
+Current implementation:
+
+Backup Manifest
+
+Purpose:
+
+Store metadata for backups.
+
+Status:
+
+Stable.
+
+Do not reuse for desktop package manifests.
+
+Desktop package manifests will be implemented separately in a future milestone.
