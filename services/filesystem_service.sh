@@ -1,63 +1,68 @@
 #!/usr/bin/env bash
 
-filesystem_copy_directory() {
+filesystem_service_create_directory() {
 
-    local dry_run=false
-    local force=false
-    local backup=false
-    local verbose=false
+    local directory="$1"
 
-    while [[ $# -gt 0 ]]; do
+    directory="${directory/#\~/$HOME}"
 
-        case "$1" in
+    local existed=false
 
-            --dry-run)
+    if [[ -e "$directory" ]]; then
+        existed=true
+    fi
 
-                dry_run=true
-                shift
-                ;;
+    filesystem_operation_create_directory \
+        "$directory" \
+    || return 1
 
-            --force)
+    if [[ "$existed" == false ]]; then
 
-                force=true
-                shift
-                ;;
+        transaction_register \
+            "rm -rf \"$directory\""
 
-            --backup)
+    fi
 
-                backup=true
-                shift
-                ;;
+}
 
-            --verbose)
+filesystem_service_exists() {
 
-                verbose=true
-                shift
-                ;;
+    local path="$1"
 
-            *)
+    path="${path/#\~/$HOME}"
 
-                break
-                ;;
+    [[ -e "$path" ]]
 
-        esac
+}
 
-    done
+filesystem_service_remove() {
+
+    local path="$1"
+
+    path="${path/#\~/$HOME}"
+
+    filesystem_operation_remove \
+        "$path"
+
+}
+
+filesystem_service_copy_directory() {
 
     local source="$1"
-
     local destination="$2"
 
-    echo "source=$source"
+    source="${source/#\~/$HOME}"
+    destination="${destination/#\~/$HOME}"
 
-    echo "destination=$destination"
+    filesystem_service_exists "$source" \
+    || return 1
 
-    echo "dry_run=$dry_run"
+    filesystem_service_create_directory \
+        "$destination" \
+    || return 1
 
-    echo "force=$force"
-
-    echo "backup=$backup"
-
-    echo "verbose=$verbose"
+    filesystem_operation_copy_directory \
+        "$source" \
+        "$destination"
 
 }

@@ -11,7 +11,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$PROJECT_ROOT/lib/bootstrap.sh"
 source "$PROJECT_ROOT/services/bootstrap.sh"
 source "$PROJECT_ROOT/modules/bootstrap.sh"
-
+execution_set_command_context "$@"
 #
 # Dispatcher
 #
@@ -27,5 +27,5 @@ load_config
 log_info "Starting HCC..."
 
 VERSION="$(<"$PROJECT_ROOT/VERSION")"
-
+command_context_set "$@"
 dispatch_command "$@"

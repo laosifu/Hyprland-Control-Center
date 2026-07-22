@@ -329,3 +329,47 @@ Stable.
 Do not reuse for desktop package manifests.
 
 Desktop package manifests will be implemented separately in a future milestone.
+
+---
+
+# 13. Release Update — v0.2.0 (2026-07-22)
+
+Completed in this release:
+
+* Desktop package payloads are self-contained under `desktop-packages/`; the
+  `analysis/` workspace is research-only.
+* Desktop package metadata, payload locations and copy items are validated
+  before a plan can execute.
+* Desktop installation now checks supported distributions and supports optional
+  `pre-install.sh` and `post-install.sh` hooks.
+* Deployment and Action Engine APIs execute the real validated plan rather than
+  acting as placeholders.
+* Backup creates an isolated timestamped snapshot with a backup manifest;
+  restore can list snapshots or restore a selected snapshot after confirmation.
+* Themes and plugins support install and uninstall commands.
+* CLI help and integration coverage reflect the available commands.
+
+Verification:
+
+* Unit suite passes.
+* CLI smoke suite passes (8 commands).
+* Backup-and-restore was verified in an isolated temporary home directory.
+
+---
+
+# 14. Profile Registry Foundation — v0.3.0 (2026-07-22)
+
+HCC now records every successful desktop installation as a local desktop
+profile. Profile state contains package metadata, origin, the pre-install
+snapshot and a deployment ownership plan. The active profile is explicit,
+rather than inferred from files in `$HOME`.
+
+Current user commands:
+
+* `hcc profile list`
+* `hcc profile status`
+
+The registry is the prerequisite for safe switching, updates and rollback.
+Repository URL installation remains intentionally pending until a trusted
+manifest format and explicit preview policy are implemented; HCC must never
+execute arbitrary installer scripts from an untrusted link.

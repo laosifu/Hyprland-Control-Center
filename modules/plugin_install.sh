@@ -101,3 +101,23 @@ run_plugin_install() {
 
     print_success "Plugin installed"
 }
+
+run_plugin_uninstall() {
+
+    local plugin="$1"
+    local plugin_dir
+    local script
+
+    [[ -n "$plugin" ]] || {
+        print_error "Plugin name required"
+        return 1
+    }
+
+    plugin_dir="$PROJECT_ROOT/plugins/$plugin"
+    validate_plugin "$plugin_dir" || return 1
+
+    script="$plugin_dir/uninstall.sh"
+    print_info "Executing uninstall.sh"
+    command_run bash "$script"
+
+}

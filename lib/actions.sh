@@ -18,9 +18,10 @@ action_install_aur() {
 
 action_copy_directory() {
 
-    local directory="$1"
+    local source="$1"
+    local destination="$2"
 
-    echo "COPY_DIRECTORY|$directory"
+    echo "COPY_DIRECTORY|$source|$destination"
 
 }
 
@@ -31,5 +32,12 @@ action_clone_repository() {
     local destination="$2"
 
     echo "CLONE_REPOSITORY|$repository|$destination"
+
+}
+action_backup_directory() {
+
+    local source="$1"
+
+    echo "BACKUP_DIRECTORY|$source"
 
 }

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+if [[ -n "${HCC_MODULES_BOOTSTRAP_LOADED:-}" ]]; then
+    return
+fi
+
+readonly HCC_MODULES_BOOTSTRAP_LOADED=1
+
 source "$PROJECT_ROOT/modules/doctor.sh"
 source "$PROJECT_ROOT/modules/cleanup.sh"
 
@@ -15,3 +21,5 @@ source "$PROJECT_ROOT/modules/themes.sh"
 source "$PROJECT_ROOT/modules/theme_install.sh"
 
 source "$PROJECT_ROOT/modules/desktop_install.sh"
+source "$PROJECT_ROOT/modules/profiles.sh"
+source "$PROJECT_ROOT/modules/inspect.sh"

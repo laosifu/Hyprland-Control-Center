@@ -2,35 +2,41 @@
 
 dispatch_action() {
 
-    local type="$1"
-    local arg1="$2"
-    local arg2="$3"
+    local action="$1"
 
-    case "$type" in
+    plan_record_read "$action"
+
+    case "$PLAN_RECORD_TYPE" in
 
         INSTALL_PACKAGE)
 
-            package_service_install "$arg1"
+            package_service_install \
+                "$PLAN_RECORD_ARG1"
             ;;
 
         INSTALL_AUR)
 
-            aur_service_install "$arg1"
+            aur_service_install \
+                "$PLAN_RECORD_ARG1"
             ;;
 
         CLONE_REPOSITORY)
 
-            git_service_clone "$arg1" "$arg2"
+            git_service_clone_or_update \
+                "$PLAN_RECORD_ARG1" \
+                "$PLAN_RECORD_ARG2"
             ;;
 
         COPY_DIRECTORY)
 
-            filesystem_service_copy_directory "$arg1" "$arg2"
+            filesystem_service_copy_directory \
+                "$PLAN_RECORD_ARG1" \
+                "$PLAN_RECORD_ARG2"
             ;;
 
         *)
 
-            print_error "Unknown action: $type"
+            print_error "Unknown action: $PLAN_RECORD_TYPE"
 
             return 1
             ;;

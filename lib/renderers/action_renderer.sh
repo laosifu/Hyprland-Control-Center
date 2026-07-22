@@ -4,7 +4,13 @@ render_action() {
 
     local action="$1"
 
-    IFS='|' read -r type arg1 arg2 <<< "$action"
+    local type
+    local arg1
+    local arg2
+
+    type="$(plan_record_type "$action")"
+    arg1="$(plan_record_arg1 "$action")"
+    arg2="$(plan_record_arg2 "$action")"
 
     case "$type" in
 
@@ -20,7 +26,10 @@ render_action() {
 
         COPY_DIRECTORY)
 
-            ui_field "Copy" "$arg1"
+            ui_field "Copy" ""
+
+            ui_field "Source" "$arg1"
+            ui_field "Destination" "$arg2"
             ;;
 
         CLONE_REPOSITORY)
@@ -28,7 +37,6 @@ render_action() {
             ui_field "Clone" "$arg1"
 
             ui_field "Destination" "$arg2"
-
             ;;
 
     esac

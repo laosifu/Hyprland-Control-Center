@@ -5,11 +5,15 @@ git_service_clone() {
     local repository="$1"
     local destination="$2"
 
-    command_run \
-        git \
-        clone \
+    destination="${destination/#\~/$HOME}"
+
+    git_operation_clone \
         "$repository" \
-        "$destination"
+        "$destination" \
+    || return 1
+
+    transaction_register \
+        "rm -rf \"$destination\""
 
 }
 
@@ -17,10 +21,41 @@ git_service_update() {
 
     local directory="$1"
 
-    command_run \
-        git \
-        -C \
-        "$directory" \
-        pull
+    directory="${directory/#\~/$HOME}"
+
+    git_operation_pull \
+        "$directory"
+
+}
+
+git_service_repository_exists() {
+
+    local directory="$1"
+
+    directory="${directory/#\~/$HOME}"
+
+    [[ -d "$directory/.git" ]]
+
+}
+
+git_service_clone_or_update() {
+
+    local repository="$1"
+    local destination="$2"
+
+    destination="${destination/#\~/$HOME}"
+
+    if git_service_repository_exists "$destination"
+    then
+
+        git_service_update "$destination"
+
+    else
+
+        git_service_clone \
+            "$repository" \
+            "$destination"
+
+    fi
 
 }

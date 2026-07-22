@@ -38,7 +38,23 @@ Usage:
 
     hcc cleanup
 
-    hcc restore
+    hcc backup
+
+    hcc restore [backup-id]
+
+    hcc inventory
+
+    hcc desktop install <name>
+
+    hcc profile <list|status>
+
+    hcc inspect <repository-path-or-url>
+
+    hcc theme <list|install|uninstall> [name]
+
+    hcc plugin <install|uninstall> <name>
+
+    hcc plugins
 
     hcc --version
 

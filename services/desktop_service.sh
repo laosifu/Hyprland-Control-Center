@@ -21,6 +21,15 @@ desktop_generate_install_plan() {
 
     desktop_generate_plan
 
+    if [[ "$(plan_size)" -eq 0 ]]
+    then
+
+        print_error "Desktop package produced an empty installation plan."
+
+        return 1
+
+    fi
+
 }
 
 desktop_render_plan() {
@@ -54,13 +63,11 @@ desktop_confirm_execution() {
 
 desktop_execute_plan() {
 
-    require_root desktop install "$NAME" || return 1
-
     print_info "Executing plan"
 
     echo
 
-    plan_execute
+    desktop_pipeline_run
 
 }
 
@@ -86,7 +93,8 @@ desktop_service_install() {
 
     desktop_render_summary
 
-    desktop_generate_install_plan
+    desktop_generate_install_plan \
+||  return 1
 
     desktop_render_plan
 
@@ -94,7 +102,29 @@ desktop_service_install() {
         return 0
     fi
 
-    desktop_execute_plan
+    plan_validate || {
+
+    print_error "Generated plan is invalid."
+
+    return 1
+
+}
+
+    desktop_execute_plan || return 1
+
+    profile_registry_register \
+        "$ID" \
+        "$NAME" \
+        "$VERSION" \
+        "${SOURCE_URL:-local}" \
+        "${DESKTOP_PREVIOUS_SNAPSHOT:-}" \
+    || return 1
+
+    profile_ownership_record_plan "$ID" || return 1
+
+    profile_registry_activate "$ID" || return 1
+
+    print_success "Profile activated: $NAME"
 
     echo
 

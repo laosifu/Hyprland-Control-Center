@@ -37,3 +37,30 @@ plan_render() {
     plan_foreach render_action
 
 }
+plan_add_install_package() {
+
+    plan_add \
+        "$package"
+
+}
+
+plan_add_install_aur() {
+
+    plan_add \
+        "$(action_install_aur "$1")"
+
+}
+
+plan_add_copy_directory() {
+
+    plan_add \
+        "$(action_copy_directory "$1")"
+
+}
+
+plan_add_clone_repository() {
+
+    plan_add \
+        "$(action_clone_repository "$1" "$2")"
+
+}

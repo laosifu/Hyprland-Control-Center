@@ -3,42 +3,33 @@
 desktop_generate_plan() {
 
     local package
-
     local repository
-
     local url
-
     local destination
+    local item
+    local source
+    local target
+
+    plan_reset
 
     #
     # Pacman
     #
-    for package in $PACMAN_PACKAGES
-    do
-        plan_add "$(action_install_package "$package")"
-    done
+    planner_package
 
     #
     # AUR
     #
-    for package in $AUR_PACKAGES
-    do
-        plan_add "$(action_install_aur "$package")"
-    done
+    planner_aur
 
     #
-    # Git repositories
+    # Git
     #
-    while read -r repository
-    do
+    planner_git <<< "$GIT_REPOSITORIES"
 
-        [[ -z "$repository" ]] && continue
-
-        IFS='|' read -r url destination <<< "$repository"
-
-        plan_add "$(action_clone_repository "$url" "$destination")"\
-           
-
-    done <<< "$GIT_REPOSITORIES"
+    #
+    # Copy Items
+    #
+    planner_copy <<< "$COPY_ITEMS"
 
 }

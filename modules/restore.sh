@@ -4,7 +4,30 @@ run_restore() {
 
     print_header "Restore Engine"
 
+    local selected="${1:-}"
     local count=0
+
+    if [[ -n "$selected" ]]; then
+        local backup="$(get_backup_dir)/$selected"
+
+        [[ -d "$backup" ]] || {
+            print_error "Backup not found: $selected"
+            return 1
+        }
+
+        read -rp "Restore $selected into $HOME? [y/N]: " answer
+        case "$answer" in
+            [Yy]|[Yy][Ee][Ss])
+                backup_restore_snapshot "$backup"
+                print_success "Restore completed"
+                return 0
+                ;;
+            *)
+                print_warning "Restore cancelled."
+                return 0
+                ;;
+        esac
+    fi
 
     echo
 

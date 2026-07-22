@@ -10,125 +10,69 @@ dispatch_command() {
 
         doctor)
 
-            log_info "Running doctor"
-
-            run_doctor "$@"
+            doctor_dispatch "$@"
 
             ;;
 
         cleanup)
 
-            log_info "Running cleanup"
-
-            run_cleanup "$@"
+            cleanup_dispatch "$@"
 
             ;;
 
         backup)
 
-            log_info "Running backup"
-
-            run_backup "$@"
+            backup_dispatch "$@"
 
             ;;
 
         restore)
 
-            log_info "Running restore"
-
-            run_restore "$@"
+            restore_dispatch "$@"
 
             ;;
 
         inventory)
 
-            log_info "Running inventory"
-
-            run_inventory "$@"
+            inventory_dispatch "$@"
 
             ;;
 
         plugins)
 
-            log_info "Running plugin manager"
-
-            run_plugins "$@"
+            plugins_dispatch "$@"
 
             ;;
+
         desktop)
 
-    case "${1:-}" in
+            desktop_dispatch "$@"
 
-        install)
-
-            shift
-            run_desktop_install "$@"
             ;;
 
-        *)
+        profile)
 
-            print_error "Usage: hcc desktop install <name>"
+            profile_dispatch "$@"
+
             ;;
 
-    esac
+        inspect)
 
-    ;;
+            inspect_dispatch "$@"
+
+            ;;
+
         plugin)
 
-            case "${1:-}" in
-
-                install)
-
-                    shift
-
-                    log_info "Running plugin installer"
-
-                    run_plugin_install "$@"
-
-                    ;;
-
-                *)
-
-                    print_error "Usage: hcc plugin install <name>"
-
-                    ;;
-
-            esac
+            plugin_dispatch "$@"
 
             ;;
-            
 
         theme)
 
-            case "${1:-}" in
-
-                list|"")
-
-                    log_info "Running theme manager"
-
-                    run_themes
-
-                    ;;
-                    install)
-
-                        shift
-
-                        log_info "Running theme installer"
-
-                        run_theme_install "$@"
-
-                        ;;
-
-                *)
-
-                    print_error "Usage: hcc theme list"
-
-                    ;;
-
-            esac
+            theme_dispatch "$@"
 
             ;;
-            
 
         --version)
 
@@ -136,7 +80,7 @@ dispatch_command() {
 
             ;;
 
-        help)
+        help|--help)
 
             show_help
 

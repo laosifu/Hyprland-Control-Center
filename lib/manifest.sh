@@ -5,6 +5,12 @@ write_manifest() {
     local target="$1"
 
     local file="$target/manifest.txt"
+    local hypr_ver
+
+    if execution_is_dry_run; then
+        print_info "[DRY-RUN] Write backup manifest: $file"
+        return 0
+    fi
     
     if has_command Hyprland; then
 

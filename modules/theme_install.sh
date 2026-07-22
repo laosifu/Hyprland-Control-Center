@@ -68,3 +68,24 @@ run_theme_install() {
     fi
 
 }
+
+run_theme_uninstall() {
+
+    local name="$1"
+    local theme
+
+    [[ -n "$name" ]] || {
+        print_error "Theme name required"
+        return 1
+    }
+
+    theme="$(theme_directory "$name")"
+    theme_validate "$theme" || {
+        print_error "Theme validation failed"
+        return 1
+    }
+
+    print_info "Executing uninstall.sh"
+    command_run bash "$(theme_uninstall_script "$theme")"
+
+}
