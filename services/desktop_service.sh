@@ -25,6 +25,10 @@ desktop_generate_install_plan() {
     then
 
         print_error "Desktop package produced an empty installation plan."
+        echo
+        print_info "package.conf thieu PACMAN_PACKAGES, AUR_PACKAGES, GIT_REPOSITORIES, hoac COPY_ITEMS."
+        print_info "Chinh sua: $(desktop_external_package_file "${ID:-}" 2>/dev/null || echo "package.conf")"
+        print_info "Sau do chay lai: hcc desktop install ${ID:-<ten>}"
 
         return 1
 
@@ -191,8 +195,24 @@ desktop_service_install() {
 
     desktop_render_summary
 
-    desktop_generate_install_plan \
-||  return 1
+    if ! desktop_generate_install_plan; then
+
+        if desktop_external_exists "${ID:-}" 2>/dev/null; then
+            echo
+            local edit_answer
+            read -rp "Mo package.conf de chinh sua? [Y/n]: " edit_answer
+            case "$edit_answer" in
+                [Nn]|[Nn][Oo])
+                    return 1
+                    ;;
+            esac
+            desktop_external_edit_package_conf "$ID"
+            echo
+            print_info "Chay lai: hcc desktop install $ID"
+        fi
+        return 1
+
+    fi
 
     desktop_render_plan
 

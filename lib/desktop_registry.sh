@@ -320,6 +320,25 @@ EOF
     fi
 }
 
+desktop_external_edit_package_conf() {
+    local id="$1"
+    local dir
+    dir="$(desktop_external_package_dir "$id")"
+    local editor="${EDITOR:-nano}"
+
+    print_info "Dang mo: $dir/package.conf"
+    if command -v "$editor" &>/dev/null; then
+        "$editor" "$dir/package.conf"
+    elif command -v "nano" &>/dev/null; then
+        nano "$dir/package.conf"
+    elif command -v "vi" &>/dev/null; then
+        vi "$dir/package.conf"
+    else
+        print_warning "Khong tim thay trinh soan thao. Edit thu cong: $dir/package.conf"
+        return 1
+    fi
+}
+
 desktop_external_add() {
     local url="$1"
     local id="$2"
@@ -329,8 +348,17 @@ desktop_external_add() {
 
     if desktop_external_exists "$id"; then
         print_warning "External package '$id' da ton tai: $dir"
-        print_info "Dung: hcc desktop install $id"
-        return 1
+        echo
+        local answer
+        read -rp "Chinh sua package.conf? [Y/n]: " answer
+        case "$answer" in
+            [Nn]|[Nn][Oo])
+                print_info "Dung: hcc desktop install $id"
+                return 0
+                ;;
+        esac
+        desktop_external_edit_package_conf "$id"
+        return 0
     fi
 
     mkdir -p "$dir" || return 1
@@ -343,10 +371,6 @@ desktop_external_add() {
     }
 
     desktop_external_generate_package_conf "$dir" "$id" "$name" "$url"
-
-    print_success "Da them external desktop: $id"
-    echo
-    print_info "Cai dat bang: hcc desktop install $id"
 }
 
 desktop_external_remove() {
