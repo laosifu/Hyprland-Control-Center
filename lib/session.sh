@@ -319,6 +319,59 @@ session_remove() {
     fi
 }
 
+session_build_manifest_from_plan() {
+    local id="$1"
+    local found=false
+    local action
+    local dest rel
+
+    rm -f "$(session_manifest_file "$id")"
+
+    for action in "${PLAN_ACTIONS[@]}"
+    do
+        plan_record_read "$action"
+
+        case "$PLAN_RECORD_TYPE" in
+            COPY_DIRECTORY|CLONE_REPOSITORY)
+                dest="${PLAN_RECORD_ARG2/#\~/$HOME}"
+                rel="${dest/#$HOME\//}"
+                [[ "$rel" == "$dest" ]] && continue
+                session_manifest_add "$id" "$rel"
+                found=true
+                ;;
+        esac
+    done
+
+    [[ "$found" == true ]]
+}
+
+session_setup_login_entry() {
+    local id="$1"
+    session_load "$id" || return 1
+
+    local name="${SESSION_NAME:-$id}"
+    local hypr_config
+    hypr_config="$(session_get_hypr_config "$id")" || return 1
+
+    local desktop_file="/usr/share/wayland-sessions/hcc-$id.desktop"
+
+    if [[ ! -f "$desktop_file" ]]; then
+        if [[ -w "/usr/share/wayland-sessions" ]]; then
+            cat > "$desktop_file" << EOF
+[Desktop Entry]
+Name=HCC - $name
+Comment=Hyprland with $name session configuration
+Exec=/usr/lib/hcc/session-launcher $id
+Type=Application
+DesktopNames=Hyprland
+EOF
+            print_success "Login entry created: $desktop_file"
+        else
+            print_info "Login entry not created (need root). Run: sudo hcc session setup-login"
+        fi
+    fi
+}
+
 session_setup_login_entries() {
     local id
     local name
