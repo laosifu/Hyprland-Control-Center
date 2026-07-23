@@ -241,6 +241,99 @@ desktop_external_load_package() {
     desktop_package_validate_external "$dir" || return 1
 }
 
+desktop_external_known_packages() {
+    local config_dir="$1"
+    case "$config_dir" in
+        hypr|hyprland)              echo "hyprland";;
+        kitty)                      echo "kitty";;
+        waybar)                     echo "waybar";;
+        wofi)                       echo "wofi";;
+        rofi)                       echo "rofi-wayland";;
+        dunst)                      echo "dunst";;
+        mako)                       echo "mako";;
+        swaync)                     echo "swaync";;
+        fish)                       echo "fish";;
+        alacritty)                  echo "alacritty";;
+        nvim|neovim)                echo "neovim";;
+        tmux)                       echo "tmux";;
+        btop)                       echo "btop";;
+        cava)                       echo "cava";;
+        "gtk-3.0")                  echo "gtk3";;
+        "gtk-4.0")                  echo "gtk4";;
+        starship)                   echo "starship";;
+        picom)                      echo "picom";;
+        pipewire)                   echo "pipewire wireplumber";;
+        swaylock)                   echo "swaylock";;
+        waybar-swaync)              echo "waybar swaync";;
+        wallpaper|swww)             echo "swww";;
+        cliphist)                   echo "cliphist";;
+        wlogout)                    echo "wlogout";;
+        hyprlock)                   echo "hyprlock";;
+        hypridle)                   echo "hypridle";;
+        hyprpaper)                  echo "hyprpaper";;
+        eww)                        echo "AUR:eww";;
+        hyprpanel)                  echo "AUR:hyprpanel";;
+        quickshell)                 echo "AUR:quickshell-git";;
+        nwg-look)                   echo "AUR:nwg-look";;
+        "qt5ct"|"qt6ct")            echo "qt5ct qt6ct";;
+        *)                          echo "";;
+    esac
+}
+
+desktop_external_detect_packages() {
+    local dir="$1"
+    local pacman=""
+    local aur=""
+    local seen=""
+
+    local entry already has
+
+    if [[ -d "$dir/.config" ]]; then
+        local sub
+        for sub in "$dir/.config"/*/
+        do
+            [[ -d "$sub" ]] || continue
+            local name
+            name="$(basename "$sub")"
+            local pkgs
+            pkgs="$(desktop_external_known_packages "$name")"
+            [[ -z "$pkgs" ]] && continue
+            for entry in $pkgs; do
+                case "$entry" in
+                    AUR:*)
+                        has=false
+                        for already in $aur; do
+                            [[ "$already" == "${entry#AUR:}" ]] && has=true
+                        done
+                        [[ "$has" == false ]] && aur="$aur ${entry#AUR:}"
+                        ;;
+                    *)
+                        has=false
+                        for already in $pacman; do
+                            [[ "$already" == "$entry" ]] && has=true
+                        done
+                        [[ "$has" == false ]] && pacman="$pacman $entry"
+                        ;;
+                esac
+            done
+        done
+    fi
+
+    if [[ -d "$dir/hypr" || -d "$dir/.config/hypr" ]]; then
+        local hpkgs
+        hpkgs="$(desktop_external_known_packages "hypr")"
+        for entry in $hpkgs; do
+            case "$entry" in
+                AUR:*) has=false; for already in $aur; do [[ "$already" == "${entry#AUR:}" ]] && has=true; done; [[ "$has" == false ]] && aur="$aur ${entry#AUR:}" ;;
+                *) has=false; for already in $pacman; do [[ "$already" == "$entry" ]] && has=true; done; [[ "$has" == false ]] && pacman="$pacman $entry" ;;
+            esac
+        done
+    fi
+
+    echo "${pacman# }"
+    echo "${aur# }"
+}
+
 desktop_external_detect_copy_items() {
     local dir="$1"
     local items=""
@@ -267,6 +360,39 @@ desktop_external_detect_copy_items() {
     [[ -n "$items" ]] && echo "$items"
 }
 
+desktop_external_detect_git_repos() {
+    local dir="$1"
+    local items=""
+    local sub
+
+    if [[ -f "$dir/.gitmodules" ]]; then
+        local url path
+        while IFS= read -r line; do
+            if [[ "$line" =~ url[[:space:]]*=[[:space:]]*(.*) ]]; then
+                url="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ path[[:space:]]*=[[:space:]]*(.*) ]]; then
+                path="${BASH_REMATCH[1]}"
+                if [[ -n "$url" && -n "$path" ]]; then
+                    items="${items}${url}|~/${path}"$'\n'
+                    url=""
+                    path=""
+                fi
+            fi
+        done < "$dir/.gitmodules"
+    fi
+
+    for sub in "$dir"/*/; do
+        [[ -d "$sub/.git" ]] || continue
+        local name
+        name="$(basename "$sub")"
+        local origin
+        origin="$(git -C "$sub" config --get remote.origin.url 2>/dev/null)" || continue
+        items="${items}${origin}|~/.config/${name}"$'\n'
+    done
+
+    [[ -n "$items" ]] && echo "$items"
+}
+
 desktop_external_generate_package_conf() {
     local dir="$1"
     local id="$2"
@@ -274,6 +400,14 @@ desktop_external_generate_package_conf() {
     local url="$4"
     local copy_items
     copy_items="$(desktop_external_detect_copy_items "$dir")"
+
+    local pacman_pkgs aur_pkgs
+    mapfile -t pkg_lines < <(desktop_external_detect_packages "$dir")
+    pacman_pkgs="${pkg_lines[0]:-}"
+    aur_pkgs="${pkg_lines[1]:-}"
+
+    local git_items
+    git_items="$(desktop_external_detect_git_repos "$dir")"
 
     local editor="${EDITOR:-nano}"
 
@@ -286,21 +420,28 @@ DESCRIPTION="External package from $url"
 SUPPORTED_DISTROS=""
 PACKAGE_ROOT="."
 REBOOT_REQUIRED=false
-PACMAN_PACKAGES=""
-AUR_PACKAGES=""
-GIT_REPOSITORIES=""
+PACMAN_PACKAGES="$pacman_pkgs"
+AUR_PACKAGES="$aur_pkgs"
+GIT_REPOSITORIES="$git_items"
 COPY_ITEMS="$copy_items"
 EOF
 
     print_success "Da tao package.conf: $dir/package.conf"
     echo
-    print_info "Cac truong can quan tam:"
-    print_info "  PACMAN_PACKAGES   — Goi can cai tu Pacman (vd: hyprland kitty waybar)"
-    print_info "  AUR_PACKAGES      — Goi can cai tu AUR (vd: hyprpicker-git)"
-    print_info "  GIT_REPOSITORIES  — Repo can clone (vd: url|~/.config/ten-repo)"
-    print_info "  COPY_ITEMS        — Thu muc config can copy (da tu dong phat hien)"
+    if [[ -n "$pacman_pkgs" ]]; then
+        print_info "Tu dong phat hien PACMAN: $pacman_pkgs"
+    fi
+    if [[ -n "$aur_pkgs" ]]; then
+        print_info "Tu dong phat hien AUR: $aur_pkgs"
+    fi
+    if [[ -n "$git_items" ]]; then
+        print_info "Tu dong phat hien GIT repos"
+    fi
+    if [[ -z "$pacman_pkgs" && -z "$aur_pkgs" && -z "$git_items" && -z "$copy_items" ]]; then
+        print_warning "Khong the tu dong phat hien. Can nhap tay."
+    fi
     echo
-    print_warning "Muon chinh sua package.conf truoc khi cai?"
+    print_warning "Muon kiem tra va chinh sua package.conf?"
     local answer
     read -rp "Mo trinh soan thao? [Y/n]: " answer
     case "$answer" in
