@@ -3,9 +3,11 @@
 source "$PROJECT_ROOT/lib/plugins.sh"
 source "$PROJECT_ROOT/lib/themes.sh"
 
+source "$PROJECT_ROOT/lib/desktop_registry.sh"
 source "$PROJECT_ROOT/lib/desktop_packages.sh"
 source "$PROJECT_ROOT/lib/profile_registry.sh"
 source "$PROJECT_ROOT/lib/profile_ownership.sh"
+source "$PROJECT_ROOT/lib/session.sh"
 source "$PROJECT_ROOT/lib/repository_inspector.sh"
 source "$PROJECT_ROOT/lib/desktop_manifest.sh"
 

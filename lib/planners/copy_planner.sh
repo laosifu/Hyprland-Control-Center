@@ -6,6 +6,8 @@ planner_copy() {
     local source
     local target
 
+    local base="${PACKAGE_ROOT_DIR:-$PROJECT_ROOT}"
+
     while read -r item
     do
 
@@ -14,7 +16,7 @@ planner_copy() {
         IFS='|' read -r source target <<< "$item"
 
         plan_copy_directory \
-        "$PROJECT_ROOT/$PACKAGE_ROOT/$source" \
+        "$base/$PACKAGE_ROOT/$source" \
         "$target"
 
     done <<< "$COPY_ITEMS"

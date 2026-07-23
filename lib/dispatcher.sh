@@ -56,6 +56,12 @@ dispatch_command() {
 
             ;;
 
+        session)
+
+            session_dispatch "$@"
+
+            ;;
+
         inspect)
 
             inspect_dispatch "$@"

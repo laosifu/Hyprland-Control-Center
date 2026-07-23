@@ -2,7 +2,15 @@
 
 desktop_dispatch() {
 
-    case "${1:-}" in
+    case "${1:-list}" in
+
+        list|"")
+
+            log_info "Listing available desktops"
+
+            run_desktop_list
+
+            ;;
 
         install)
 
@@ -14,9 +22,19 @@ desktop_dispatch() {
 
             ;;
 
+        uninstall)
+
+            shift
+
+            log_info "Running desktop uninstaller"
+
+            run_desktop_uninstall "$@"
+
+            ;;
+
         *)
 
-            print_error "Usage: hcc desktop install <name>"
+            print_error "Usage: hcc desktop <list|install|uninstall> [name]"
 
             ;;
 

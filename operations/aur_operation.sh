@@ -8,7 +8,6 @@ aur_operation_install_package() {
         yay \
         -S \
         --needed \
-        --noconfirm \
         --answerclean None \
         --answerdiff None \
         --answeredit None \

@@ -19,9 +19,6 @@ aur_service_install() {
 
     fi
 
-    privilege_require_root_unless_dry_run \
-    || return 1
-
     aur_operation_install_package \
         "$package"
 

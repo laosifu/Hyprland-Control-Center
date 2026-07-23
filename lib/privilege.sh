@@ -14,7 +14,7 @@ privilege_require_root() {
 
     echo
 
-    echo "    sudo hcc ${COMMAND_CONTEXT[*]}"
+    echo "    sudo $0 ${COMMAND_CONTEXT[*]}"
 
     return 1
 

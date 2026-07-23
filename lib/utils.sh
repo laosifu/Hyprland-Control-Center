@@ -32,32 +32,52 @@ cat <<EOF
 
 Hyprland Control Center
 
-Usage:
+Cai dat desktop Hyprland de dang.
 
-    hcc doctor
+SU DUNG:
 
-    hcc cleanup
+    hcc <lenh> [doi so]
 
-    hcc backup
+LENH:
 
-    hcc restore [backup-id]
+    hcc doctor              Kiem tra he thong
+    hcc desktop list        Xem desktop packages co san
+    hcc desktop install <ten|url|dir>  Cai desktop (registry/URL/thu muc)
 
-    hcc inventory
+    hcc profile list        Xem profile da cai
+    hcc profile status      Xem profile dang dung
+    hcc profile switch <id> Chuyen doi profile (chuyen active)
 
-    hcc desktop install <name>
+    hcc session list        Xem danh sach session
+    hcc session switch      Menu tuong tac chon session
+    hcc session setup-login Tao login entries cho Display Manager
 
-    hcc profile <list|status>
+    hcc backup              Backup config hien tai
+    hcc restore [id]        Khoi phuc tu backup
 
-    hcc inspect <repository-path-or-url>
+    hcc theme list          Xem themes
+    hcc theme install <ten> Cai theme
+    hcc theme uninstall <ten> Go theme
 
-    hcc theme <list|install|uninstall> [name]
+    hcc plugins             Xem plugins
+    hcc plugin install <ten>  Cai plugin
+    hcc plugin uninstall <ten> Go plugin
 
-    hcc plugin <install|uninstall> <name>
+    hcc inventory           Kiem tra thanh phan he thong
+    hcc cleanup             Xem dung luong cache
+    hcc inspect <path>      Xem thong tin repository
 
-    hcc plugins
+    hcc --version           Phien ban
+    hcc help                Tro giup nay
 
-    hcc --version
+VI DU:
+
+    hcc desktop list
+    hcc desktop install mailong2401
+    hcc desktop install https://github.com/end-4/dots-hyprland
+    hcc profile switch end-4
+
+Xem README.md de biet huong dan chi tiet.
 
 EOF
-
 }
