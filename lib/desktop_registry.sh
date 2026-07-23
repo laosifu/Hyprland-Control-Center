@@ -252,15 +252,72 @@ desktop_external_detect_copy_items() {
             [[ -d "$sub" ]] || continue
             local name
             name="$(basename "$sub")"
-            items="$items.config/$name|~/.config/$name"$'\n'
+            items="${items}.config/${name}|~/.config/${name}"$'\n'
         done
     fi
 
     if [[ -d "$dir/hypr" ]]; then
-        items="$items hypr|~/.config/hypr"$'\n'
+        items="${items}hypr|~/.config/hypr"$'\n'
+    fi
+
+    if [[ -d "$dir/.local/share" ]]; then
+        items="${items}.local/share|~/.local/share"$'\n'
     fi
 
     [[ -n "$items" ]] && echo "$items"
+}
+
+desktop_external_generate_package_conf() {
+    local dir="$1"
+    local id="$2"
+    local name="$3"
+    local url="$4"
+    local copy_items
+    copy_items="$(desktop_external_detect_copy_items "$dir")"
+
+    local editor="${EDITOR:-nano}"
+
+    cat > "$dir/package.conf" << EOF
+NAME="$name"
+ID="$id"
+VERSION="0.1.0"
+AUTHOR="$(basename "$(dirname "$url")")"
+DESCRIPTION="External package from $url"
+SUPPORTED_DISTROS=""
+PACKAGE_ROOT="."
+REBOOT_REQUIRED=false
+PACMAN_PACKAGES=""
+AUR_PACKAGES=""
+GIT_REPOSITORIES=""
+COPY_ITEMS="$copy_items"
+EOF
+
+    print_success "Da tao package.conf: $dir/package.conf"
+    echo
+    print_info "Cac truong can quan tam:"
+    print_info "  PACMAN_PACKAGES   — Goi can cai tu Pacman (vd: hyprland kitty waybar)"
+    print_info "  AUR_PACKAGES      — Goi can cai tu AUR (vd: hyprpicker-git)"
+    print_info "  GIT_REPOSITORIES  — Repo can clone (vd: url|~/.config/ten-repo)"
+    print_info "  COPY_ITEMS        — Thu muc config can copy (da tu dong phat hien)"
+    echo
+    print_warning "Muon chinh sua package.conf truoc khi cai?"
+    local answer
+    read -rp "Mo trinh soan thao? [Y/n]: " answer
+    case "$answer" in
+        [Nn]|[Nn][Oo])
+            return 0
+            ;;
+    esac
+
+    if command -v "$editor" &>/dev/null; then
+        "$editor" "$dir/package.conf"
+    elif command -v "nano" &>/dev/null; then
+        nano "$dir/package.conf"
+    elif command -v "vi" &>/dev/null; then
+        vi "$dir/package.conf"
+    else
+        print_warning "Khong tim thay trinh soan thao. Edit thu cong: $dir/package.conf"
+    fi
 }
 
 desktop_external_add() {
@@ -285,32 +342,11 @@ desktop_external_add() {
         return 1
     }
 
-    local copy_items
-    copy_items="$(desktop_external_detect_copy_items "$dir")"
-
-    cat > "$dir/package.conf" << EOF
-NAME="$name"
-ID="$id"
-VERSION="0.1.0"
-AUTHOR="$(basename "$(dirname "$url")")"
-DESCRIPTION="External package from $url"
-PACKAGE_ROOT="."
-REBOOT_REQUIRED=false
-EOF
-
-    if [[ -n "$copy_items" ]]; then
-        printf 'COPY_ITEMS="%s"\n' "$copy_items" >> "$dir/package.conf"
-        print_info "Phat hien config: $(echo "$copy_items" | wc -l) muc"
-    else
-        echo 'COPY_ITEMS=""' >> "$dir/package.conf"
-        print_warning "Khong phat hien config nao. Can chinh sua package.conf thu cong."
-    fi
+    desktop_external_generate_package_conf "$dir" "$id" "$name" "$url"
 
     print_success "Da them external desktop: $id"
-    print_info "Duong dan: $dir"
     echo
     print_info "Cai dat bang: hcc desktop install $id"
-    print_info "Chinh sua package.conf: $dir/package.conf"
 }
 
 desktop_external_remove() {

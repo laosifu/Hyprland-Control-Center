@@ -4,7 +4,7 @@ planner_aur() {
 
     local package
 
-    for package in $AUR_PACKAGES
+    for package in ${AUR_PACKAGES:-}
     do
         plan_install_aur "$package"
     done

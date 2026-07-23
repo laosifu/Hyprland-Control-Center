@@ -17,6 +17,6 @@ planner_git() {
             "$url" \
             "$destination"
 
-    done <<< "$GIT_REPOSITORIES"
+    done <<< "${GIT_REPOSITORIES:-}"
 
 }

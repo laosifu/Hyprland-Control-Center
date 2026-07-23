@@ -19,6 +19,6 @@ planner_copy() {
         "$base/$PACKAGE_ROOT/$source" \
         "$target"
 
-    done <<< "$COPY_ITEMS"
+    done <<< "${COPY_ITEMS:-}"
 
 }

@@ -115,24 +115,38 @@ desktop_service_install() {
 
                 echo
                 print_warning "Repo khong co package.conf hop le."
-                print_info "Co muon clone vao external desktop de dung sau?"
+                print_info "HCC co the clone repo vao external desktop de ban tu cau hinh."
                 echo
                 print_info "  ID: $ext_id"
                 print_info "  URL: $desktop"
                 echo
                 local answer
-                read -rp "Clone vao external desktop? [y/N]: " answer
+                read -rp "Clone vao external desktop? [Y/n]: " answer
                 case "$answer" in
-                    [Yy]|[Yy][Ee][Ss])
+                    [Nn]|[Nn][Oo])
                         rm -rf "$external_dir"
-                        if desktop_external_add "$desktop" "$ext_id" "$ext_name"; then
-                            echo
-                            print_info "Chay: hcc desktop install $ext_id"
-                            print_info "Hoac chinh sua package.conf truoc: $(desktop_external_package_file "$ext_id")"
-                        fi
-                        return 0
+                        print_error "External repository does not contain a valid HCC desktop package"
+                        print_info "Thu: hcc desktop list (xem desktop co san)"
+                        return 1
                         ;;
                 esac
+
+                rm -rf "$external_dir"
+                if desktop_external_add "$desktop" "$ext_id" "$ext_name"; then
+                    echo
+                    print_info "Da san sang. Tien hanh cai dat ngay?"
+                    local install_now
+                    read -rp "Cai dat $ext_id? [Y/n]: " install_now
+                    case "$install_now" in
+                        [Nn]|[Nn][Oo])
+                            print_info "Chay sau: hcc desktop install $ext_id"
+                            return 0
+                            ;;
+                    esac
+                    desktop_service_install "$ext_id"
+                    return $?
+                fi
+                return 1
 
                 rm -rf "$external_dir"
                 print_error "External repository does not contain a valid HCC desktop package"

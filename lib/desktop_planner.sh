@@ -25,11 +25,11 @@ desktop_generate_plan() {
     #
     # Git
     #
-    planner_git <<< "$GIT_REPOSITORIES"
+    planner_git <<< "${GIT_REPOSITORIES:-}"
 
     #
     # Copy Items
     #
-    planner_copy <<< "$COPY_ITEMS"
+    planner_copy <<< "${COPY_ITEMS:-}"
 
 }
