@@ -68,7 +68,28 @@ hcc desktop install ./desktops/end-4
 ```bash
 hcc profile list        # Xem các profile đã cài
 hcc profile status      # Xem profile đang dùng
-hcc profile switch end-4  # Chuyển active profile
+hcc session list        # Xem danh sách session
+hcc session switch      # Menu tương tác chuyển session (tự động backup + restore)
+```
+
+### 5. Chuyển đổi desktop
+
+Mỗi desktop được cài vào thư mục riêng biệt:
+```
+~/.config/hcc/sessions/mailong2401/root/
+~/.config/hcc/sessions/end-4/root/
+```
+
+Khi chọn session, HCC chỉ thay symlink từ `$HOME` → session root. Desktop cũ vẫn còn nguyên, không mất dữ liệu.
+
+```bash
+hcc session switch      # TUI: chọn session, HCC tự deploy symlink
+```
+
+Để chọn ngay tại màn hình login (SDDM/GDM):
+```bash
+sudo hcc session setup-login
+# Sau đó logout, chọn "HCC - <tên>" trên màn hình login
 ```
 
 ---
@@ -83,6 +104,9 @@ hcc profile switch end-4  # Chuyển active profile
 | `hcc profile list` | Xem các profile đã cài | `hcc profile list` |
 | `hcc profile status` | Xem profile đang dùng | `hcc profile status` |
 | `hcc profile switch <id>` | Chuyển active profile | `hcc profile switch mailong2401` |
+| `hcc session list` | Xem danh sách session | `hcc session list` |
+| `hcc session switch` | TUI chuyển session (tự động restore) | `hcc session switch` |
+| `hcc session setup-login` | Tạo login entries cho SDDM/GDM | `sudo hcc session setup-login` |
 | `hcc backup` | Backup config hiện tại | `hcc backup` |
 | `hcc restore [id]` | Khôi phục từ bản backup | `hcc restore` |
 | `hcc theme list` | Xem themes có sẵn | `hcc theme list` |
@@ -168,18 +192,26 @@ HCC sẽ **cảnh báo** nếu file sắp bị ghi đè. Bạn có thể chọn 
 
 ### "Chuyển đổi giữa các desktop đã cài?"
 
-Có thể chuyển active profile:
+Dùng session switch để chuyển cả config:
 ```bash
-hcc profile switch end-4
+hcc session switch      # Menu tương tác
 ```
-⚠️ Hiện tại chỉ chuyển active marker. Config files cần `hcc restore <snapshot>` thủ công.
-Bản cập nhật sau sẽ tự động restore config khi switch.
+HCC tự động undeploy session cũ + deploy session mới (chỉ thay symlink, không mất dữ liệu).
+
+Hoặc chọn ngay từ màn hình login:
+```bash
+sudo hcc session setup-login
+# Logout → chọn "HCC - <tên>" trên SDDM/GDM
+```
+
+Mỗi desktop nằm trong thư mục riêng, hoàn toàn độc lập, không ghi đè lên nhau.
 
 ### "Cài xong không thích, có gỡ được không?"
 
-Hiện tại chưa có `hcc desktop uninstall`. Bạn có thể:
-- Dùng `hcc restore` để khôi phục config cũ
-- Hoặc cài desktop khác đè lên
+```bash
+hcc desktop uninstall <tên>   # Gỡ desktop + rollback config
+hcc session remove <tên>      # Xoá session khỏi HCC
+```
 
 ### "Muốn chia sẻ desktop package của tôi?"
 

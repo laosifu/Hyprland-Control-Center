@@ -514,140 +514,115 @@ repositories.
 
 ---
 
-# 16. Profile Switching — Current Limitation & Path Forward
+# 16. Session-Based Profile Switching — Resolved
 
-## What exists now
+> Chuyển đổi desktop được xử lý qua Session Manager (section 17) thay vì
+> profile switching cũ. Mỗi desktop là một session độc lập, switching chỉ
+> thay symlink — không cần backup/restore snapshot.
+
+## Current approach
 
 | Feature | Status |
 |---|---|
-| `hcc profile switch <id>` | ✅ Changes the active profile marker |
-| `profile_ownership_record_plan` | ✅ Records deployed files per profile |
-| `hcc backup / restore` | ✅ Timestamped snapshots (not tied to profiles) |
+| `hcc session switch` | ✅ TUI chọn session, tự động deploy/undeploy symlink |
+| `session_deploy / session_undeploy` | ✅ Chỉ thay symlink, không move file |
+| `session_setup_login_entry` | ✅ Tự động tạo login entry nếu có quyền root |
+| `hcc session setup-login` | ✅ Tạo login entries cho tất cả session |
 
-## What's missing for full switching
+## Kiến trúc
 
-To switch between two installed desktop profiles (e.g., mailong2401 ↔ end-4)
-and have config files automatically restored, we need:
+Khi install: file config được copy thẳng vào `~/.config/hcc/sessions/<id>/root/`
+(không qua $HOME). Sau đó `session_deploy` tạo symlink:
+`$HOME/.config/hypr → sessions/<id>/root/.config/hypr`
 
-### 1. Per-profile snapshots
-
-Currently `hcc backup` creates a snapshot at `$BACKUP_DIR/<timestamp>/`.
-We need profile-named snapshots:
-
-```
-$BACKUP_DIR/
-├── pre-mailong2401/       ← Created before installing mailong2401
-├── pre-end-4/             ← Created before installing end-4
-└── 2026-07-23T.../        ← Manual backups (existing)
-```
-
-The pre-install backup (`desktop_prepare_backup.sh`) already creates a
-snapshot before installation. But it's not named after the profile.
-
-**Fix:** Save the snapshot path into the profile registry so we can find
-it later: `profile_registry_register` already has a `snapshot` parameter.
-
-### 2. Switch logic
-
-When switching from Profile A → Profile B:
-
-```
-1. Ownership.plan của A  →  backup các file A đã deploy
-2. Ownership.plan của B  →  restore các file B từ snapshot
-3. Git repos của B       →  clone nếu chưa có
-4. Cập nhật active marker
-```
-
-### 3. Implementation plan
-
-| Bước | File | Mô tả |
-|---|---|---|
-| 1 | `lib/profile_ownership.sh` | Thêm hàm `profile_ownership_restore()` đọc ownership.plan và backup/restore files |
-| 2 | `lib/profile_registry.sh` | Thêm hàm `profile_registry_snapshot()` để lưu đường dẫn snapshot |
-| 3 | `modules/profile_switch.sh` | Nâng cấp: gọi ownership restore, git handling |
-| 4 | `lib/desktop_prepare_backup.sh` | Lưu snapshot path vào profile registry khi install |
-
-### 4. Dependency
-
-The current `profile_ownership_record_plan()` only records `COPY_DIRECTORY`
-and `CLONE_REPOSITORY` actions. For full restore we also need to know the
-*source* of the copied files (which snapshot to restore from). This requires
-storing the snapshot path at install time — which the `snapshot` parameter
-of `profile_registry_register` already supports but is not yet wired up.
+Khi switch: undeploy symlink cũ → deploy symlink mới. File gốc trong session
+root không bị ảnh hưởng.
 
 ---
 
 # 17. Session Manager — v0.5.0 (2026-07-23)
 
-HCC now has a session management layer that provides:
+> **Update v0.5.1:** Install flow được tự động hoá hoàn toàn. Khi cài desktop,
+> file config được copy thẳng vào session root, không qua $HOME. Symlink được
+> tạo tự động. Login entry được tạo nếu có quyền root.
 
-1. **Session registration & capture** — When a desktop is installed, HCC
-   registers it as a session and captures its deployed config files into
-   `~/.config/hcc/sessions/<id>/root/`.
+## Kiến trúc hiện tại
 
-2. **Interactive TUI** — `hcc session switch` shows a numbered menu of
-   available sessions. Select one to switch (backup current + restore target).
+```
+hcc desktop install <name>
+  ↓
+desktop_pipeline_execute()
+  ↓ session_register()           ← Tạo session trước
+  ↓ SESSION_INSTALL_ID set       ← Dispatcher redirect dest đến session root
+  ↓ deployment_service_execute_plan
+    ├── COPY_DIRECTORY → ~/.config/hcc/sessions/<id>/root/.config/
+    ├── CLONE_REPOSITORY → ~/.config/hcc/sessions/<id>/root/<repo>/
+    ├── INSTALL_PACKAGE → hệ thống (không đổi)
+    └── INSTALL_AUR → hệ thống (không đổi)
+  ↓ unset SESSION_INSTALL_ID
+  ↓
+desktop_pipeline_finalize()
+  ↓ session_build_manifest_from_plan()   ← Đọc PLAN_ACTIONS
+  ↓ session_deploy()                     ← Tạo symlink: $HOME → session/root
+  ↓ session_setup_login_entry()          ← Tạo .desktop nếu có quyền
+```
 
-3. **Display Manager integration** — `hcc session setup-login` creates
-   `.desktop` entries in `/usr/share/wayland-sessions/` so users can choose
-   their HCC session at the login screen (SDDM/GDM).
+## Session isolation (symlink-based)
 
-4. **Session launcher** — `lib/launchers/session-launcher.sh` is the entry
-   point for Wayland sessions. It sets the active marker and launches
-   `Hyprland --config <session>/hypr/hyprland.{lua|conf}`.
-
-### New components
-
-| Component | Path | Purpose |
-|---|---|---|
-| Session library | `lib/session.sh` | Core session management (register, capture, restore, switch) |
-| Session command | `lib/commands/session_command.sh` | `hcc session <subcommand>` dispatcher |
-| Session TUI | `modules/session_command.sh` | Interactive menu (`hcc session switch`) |
-| Session launcher | `lib/launchers/session-launcher.sh` | Wayland session entry point for DM |
-
-### Session directory structure
+File config không bao giờ được ghi vào $HOME trực tiếp. Mỗi desktop có thư
+mục riêng, hoàn toàn độc lập:
 
 ```
 ~/.config/hcc/sessions/
 ├── mailong2401/
-│   ├── session.conf          ← Metadata (name, version, source)
-│   └── root/                 ← Captured config files
+│   ├── session.conf
+│   ├── manifest              ← Danh sách relative paths đã deploy
+│   └── root/
 │       ├── .config/hypr/
 │       ├── .config/kitty/
 │       └── ...
 ├── end-4/
 │   ├── session.conf
-│   └── root/
-└── session-active            ← File containing active session ID
+│   ├── manifest
+│   └── root/ ...
+└── session-active
+
+$HOME/.config/hypr  →  sessions/mailong2401/root/.config/hypr  (symlink)
+$HOME/.config/kitty →  sessions/mailong2401/root/.config/kitty (symlink)
 ```
 
-### Architecture
+## Switching
 
-```
-DM login screen
-    ↓ Select "HCC - <name>"
-    ↓
-/usr/share/wayland-sessions/hcc-<id>.desktop
-    ↓
-/usr/lib/hcc/session-launcher <id>
-    ↓
-Hyprland --config <session>/root/.config/hypr/hyprland.lua
-
-Terminal:
-    hcc session switch  →  TUI menu  →  session_capture <current> + session_restore <target>
+```bash
+hcc session switch  # TUI → undeploy symlink cũ + deploy symlink mới
 ```
 
-### Verification
+Không cần move/copy file. Chỉ thay symlink. Dữ liệu session cũ vẫn nguyên.
+
+## Login screen
+
+Tự động tạo `/usr/share/wayland-sessions/hcc-<id>.desktop` nếu có quyền root.
+Nếu không, user chạy: `sudo hcc session setup-login`
+
+## Components
+
+| Component | Path | Purpose |
+|---|---|---|
+| Session library | `lib/session.sh` | Core: register, deploy, undeploy, switch, manifest, login entry |
+| Session command | `lib/commands/session_command.sh` | `hcc session <subcommand>` dispatcher |
+| Session TUI | `modules/session_command.sh` | Interactive menu (`hcc session switch`) |
+| Session launcher | `lib/launchers/session-launcher.sh` | Wayland entry point for DM |
+| Pipeline | `lib/desktop_pipeline.sh` | Orchestrates register → execute → deploy |
+| Action dispatcher | `lib/action_dispatcher.sh` | Redirects COPY_DIRECTORY/CLONE_REPOSITORY to session root |
+
+## Verification
 
 * All unit tests pass (18 tests).
-* Session register/load/capture/restore verified manually.
-* `hcc session help` shows correct usage.
+* Session register/deploy/undeploy/switch verified.
 * `hcc session list` shows registered sessions.
-* Wayne session entries can be created via `sudo hcc session setup-login`.
+* Login entries created via `hcc session setup-login` or auto if root.
 
-### Next steps
+## Next steps
 
-- Auto-create login entries at install time (needs root).
-- Fix package.conf `COPY_ITEMS` targets so configs map to `$HOME/.config/`
-  correctly (currently target is `$HOME`, should be `$HOME/.config`).
 - Add Hyprland reload after session switch for in-session config refresh.
+- External package discovery (search/community registry).
