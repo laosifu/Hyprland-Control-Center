@@ -15,18 +15,6 @@ desktop_registry_load() {
     source "$file"
 }
 
-desktop_registry_list() {
-    local root
-    root="$(desktop_registry_root)"
-    [[ -d "$root" ]] || return 0
-    desktop_registry_load || return 0
-    local id
-    for id in $DESKTOP_REGISTRY_IDS
-    do
-        [[ -n "$id" ]] && echo "$id"
-    done
-}
-
 desktop_registry_exists() {
     local id="$1"
     [[ -z "$id" ]] && return 1
@@ -203,4 +191,152 @@ desktop_package_validate_and_load_external() {
         return 1
     }
     desktop_package_validate_external "$dir" || return 1
+}
+
+#
+# External desktop registry (user-managed, $HOME based)
+#
+
+HCC_EXTERNAL_DESKTOP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/hcc/desktops"
+
+desktop_external_root() {
+    mkdir -p "$HCC_EXTERNAL_DESKTOP_DIR" 2>/dev/null || true
+    echo "$HCC_EXTERNAL_DESKTOP_DIR"
+}
+
+desktop_external_package_dir() {
+    local id="$1"
+    echo "$(desktop_external_root)/$id"
+}
+
+desktop_external_package_file() {
+    local id="$1"
+    echo "$(desktop_external_package_dir "$id")/package.conf"
+}
+
+desktop_external_list() {
+    local root
+    root="$(desktop_external_root)"
+    [[ -d "$root" ]] || return 0
+    local dir
+    for dir in "$root"/*/
+    do
+        [[ -f "$dir/package.conf" ]] || continue
+        basename "$dir"
+    done
+}
+
+desktop_external_exists() {
+    local id="$1"
+    [[ -z "$id" ]] && return 1
+    [[ -f "$(desktop_external_package_file "$id")" ]]
+}
+
+desktop_external_load_package() {
+    local id="$1"
+    local dir
+    dir="$(desktop_external_package_dir "$id")"
+    [[ -f "$dir/package.conf" ]] || return 1
+    desktop_package_load_from_dir "$dir" || return 1
+    desktop_package_validate_external "$dir" || return 1
+}
+
+desktop_external_detect_copy_items() {
+    local dir="$1"
+    local items=""
+
+    if [[ -d "$dir/.config" ]]; then
+        local sub
+        for sub in "$dir/.config"/*/
+        do
+            [[ -d "$sub" ]] || continue
+            local name
+            name="$(basename "$sub")"
+            items="$items.config/$name|~/.config/$name"$'\n'
+        done
+    fi
+
+    if [[ -d "$dir/hypr" ]]; then
+        items="$items hypr|~/.config/hypr"$'\n'
+    fi
+
+    [[ -n "$items" ]] && echo "$items"
+}
+
+desktop_external_add() {
+    local url="$1"
+    local id="$2"
+    local name="$3"
+    local dir
+    dir="$(desktop_external_package_dir "$id")"
+
+    if desktop_external_exists "$id"; then
+        print_warning "External package '$id' da ton tai: $dir"
+        print_info "Dung: hcc desktop install $id"
+        return 1
+    fi
+
+    mkdir -p "$dir" || return 1
+
+    print_info "Cloning external repo to: $dir"
+    git clone --depth 1 "$url" "$dir" || {
+        rm -rf "$dir"
+        print_error "Failed to clone repository"
+        return 1
+    }
+
+    local copy_items
+    copy_items="$(desktop_external_detect_copy_items "$dir")"
+
+    cat > "$dir/package.conf" << EOF
+NAME="$name"
+ID="$id"
+VERSION="0.1.0"
+AUTHOR="$(basename "$(dirname "$url")")"
+DESCRIPTION="External package from $url"
+PACKAGE_ROOT="."
+REBOOT_REQUIRED=false
+EOF
+
+    if [[ -n "$copy_items" ]]; then
+        printf 'COPY_ITEMS="%s"\n' "$copy_items" >> "$dir/package.conf"
+        print_info "Phat hien config: $(echo "$copy_items" | wc -l) muc"
+    else
+        echo 'COPY_ITEMS=""' >> "$dir/package.conf"
+        print_warning "Khong phat hien config nao. Can chinh sua package.conf thu cong."
+    fi
+
+    print_success "Da them external desktop: $id"
+    print_info "Duong dan: $dir"
+    echo
+    print_info "Cai dat bang: hcc desktop install $id"
+    print_info "Chinh sua package.conf: $dir/package.conf"
+}
+
+desktop_external_remove() {
+    local id="$1"
+    local dir
+    dir="$(desktop_external_package_dir "$id")"
+
+    [[ -d "$dir" ]] || {
+        print_error "External package not found: $id"
+        return 1
+    }
+
+    rm -rf "$dir"
+    print_success "Da xoa external desktop: $id"
+}
+
+desktop_registry_list() {
+    local root
+    root="$(desktop_registry_root)"
+    [[ -d "$root" ]] || return 0
+    desktop_registry_load || return 0
+    local id
+    for id in $DESKTOP_REGISTRY_IDS
+    do
+        [[ -n "$id" ]] && echo "$id"
+    done
+
+    desktop_external_list
 }

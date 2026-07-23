@@ -109,6 +109,31 @@ desktop_service_install() {
                         return $?
                     fi
                 done
+
+                local ext_id="$repo_name"
+                local ext_name="$repo_name"
+
+                echo
+                print_warning "Repo khong co package.conf hop le."
+                print_info "Co muon clone vao external desktop de dung sau?"
+                echo
+                print_info "  ID: $ext_id"
+                print_info "  URL: $desktop"
+                echo
+                local answer
+                read -rp "Clone vao external desktop? [y/N]: " answer
+                case "$answer" in
+                    [Yy]|[Yy][Ee][Ss])
+                        rm -rf "$external_dir"
+                        if desktop_external_add "$desktop" "$ext_id" "$ext_name"; then
+                            echo
+                            print_info "Chay: hcc desktop install $ext_id"
+                            print_info "Hoac chinh sua package.conf truoc: $(desktop_external_package_file "$ext_id")"
+                        fi
+                        return 0
+                        ;;
+                esac
+
                 rm -rf "$external_dir"
                 print_error "External repository does not contain a valid HCC desktop package"
                 print_info "Thu: hcc desktop list (xem desktop co san)"
@@ -130,6 +155,10 @@ desktop_service_install() {
                 :
 
             elif desktop_package_load "$desktop"; then
+
+                :
+
+            elif desktop_external_load_package "$desktop"; then
 
                 :
 
