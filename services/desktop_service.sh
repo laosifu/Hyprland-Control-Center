@@ -208,7 +208,9 @@ desktop_service_install() {
             esac
             desktop_external_edit_package_conf "$ID"
             echo
-            print_info "Chay lai: hcc desktop install $ID"
+            print_info "Thu lai ngay..."
+            desktop_service_install "$ID"
+            return $?
         fi
         return 1
 
