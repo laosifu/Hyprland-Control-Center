@@ -26,7 +26,7 @@ filesystem_operation_copy_directory() {
     operation_run \
         cp \
         -a \
-        "$source/." \
+        "$source" \
         "$destination/"
 
 }

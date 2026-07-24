@@ -80,6 +80,12 @@ dispatch_command() {
 
             ;;
 
+        ai)
+
+            ai_dispatch "$@"
+
+            ;;
+
         --version)
 
             echo "Hyprland Control Center v$VERSION"

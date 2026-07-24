@@ -119,43 +119,75 @@ desktop_service_install() {
 
                 echo
                 print_warning "Repo khong co package.conf hop le."
-                print_info "HCC co the clone repo vao external desktop de ban tu cau hinh."
+                print_info "Dang tu dong phan tich repo..."
                 echo
-                print_info "  ID: $ext_id"
-                print_info "  URL: $desktop"
-                echo
-                local answer
-                read -rp "Clone vao external desktop? [Y/n]: " answer
-                case "$answer" in
-                    [Nn]|[Nn][Oo])
-                        rm -rf "$external_dir"
-                        print_error "External repository does not contain a valid HCC desktop package"
-                        print_info "Thu: hcc desktop list (xem desktop co san)"
-                        return 1
-                        ;;
-                esac
 
                 rm -rf "$external_dir"
-                if desktop_external_add "$desktop" "$ext_id" "$ext_name"; then
+
+                local ext_dir
+                ext_dir="$(desktop_external_package_dir "$ext_id")"
+
+                if desktop_external_exists "$ext_id"; then
+                    print_warning "Desktop '$ext_id' da ton tai: $ext_dir"
+                else
+                    mkdir -p "$ext_dir" || return 1
+                    print_info "Cloning repo to: $ext_dir"
+                    git clone --depth 1 "$desktop" "$ext_dir" || {
+                        rm -rf "$ext_dir"
+                        print_error "Failed to clone repository"
+                        return 1
+                    }
+                    print_success "Da clone repo vao: $ext_dir"
+                fi
+
+                if desktop_external_generate_package_conf "$ext_dir" "$ext_id" "$ext_name" "$desktop" "auto"; then
+                    print_info "Tien hanh cai dat..."
                     echo
-                    print_info "Da san sang. Tien hanh cai dat ngay?"
-                    local install_now
-                    read -rp "Cai dat $ext_id? [Y/n]: " install_now
-                    case "$install_now" in
-                        [Nn]|[Nn][Oo])
-                            print_info "Chay sau: hcc desktop install $ext_id"
-                            return 0
-                            ;;
-                    esac
                     desktop_service_install "$ext_id"
                     return $?
                 fi
-                return 1
 
-                rm -rf "$external_dir"
-                print_error "External repository does not contain a valid HCC desktop package"
-                print_info "Thu: hcc desktop list (xem desktop co san)"
-                return 1
+                print_warning "Khong the tu dong phat hien packages."
+                echo
+                local help_loop=true
+                while [[ "$help_loop" == true ]]; do
+                    print_info "=== Khong phat hien duoc packages ==="
+                    echo
+                    print_info "  1) Huong dan dinh dang package.conf"
+                    print_info "  2) Chay script cai dat tu repo (install.sh/setup.sh) + tu dong phat hien"
+                    print_info "  3) Mo editor soan package.conf thu cong"
+                    print_info "  0) Huy, de tu cau hinh tay sau"
+                    echo
+                    local choice
+                    read -rp "Chon [1/2/3/0] (Enter=3): " choice
+                    case "$choice" in
+                        1)
+                            desktop_external_show_package_conf_help
+                            echo
+                            read -rp "Enter de quay lai menu..."
+                            ;;
+                        2)
+                            if desktop_external_run_script_and_detect "$ext_dir" "$ext_id" "$ext_name" "$desktop"; then
+                                print_info "Tien hanh cai dat..."
+                                echo
+                                desktop_service_install "$ext_id"
+                                return $?
+                            fi
+                            ;;
+                        3|"")
+                            desktop_external_edit_package_conf "$ext_id"
+                            echo
+                            print_info "Thu lai ngay..."
+                            desktop_service_install "$ext_id"
+                            return $?
+                            ;;
+                        0|q|cancel)
+                            print_info "Tu tao: $ext_dir/package.conf"
+                            print_info "Sau do chay: hcc desktop install $ext_id"
+                            return 0
+                            ;;
+                    esac
+                done
             fi
             SOURCE_URL="$desktop"
             ;;

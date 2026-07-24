@@ -58,6 +58,7 @@ run_desktop_uninstall() {
     [[ "$has_repos" == true ]] && echo "  - Xoa git repos da clone"
     [[ "$has_packages" == true ]] && echo "  - Go y xoa packages (PACMAN/AUR)"
     echo "  - Xoa profile registry"
+    echo "  - Xoa session + login entry"
 
     echo
 
@@ -115,6 +116,21 @@ run_desktop_uninstall() {
             if [[ -d "$profile_dir" ]]; then
                 filesystem_service_remove "$profile_dir"
                 print_success "Removed profile: $id"
+            fi
+
+            if session_exists "$id" 2>/dev/null; then
+                print_info "Cleaning up session: $id"
+                session_remove "$id"
+                print_success "Session removed: $id"
+            fi
+
+            if desktop_external_exists "$id" 2>/dev/null; then
+                local ext_dir
+                ext_dir="$(desktop_external_package_dir "$id")"
+                if [[ -d "$ext_dir" ]]; then
+                    filesystem_service_remove "$ext_dir"
+                    print_success "Removed external package: $ext_dir"
+                fi
             fi
 
             local active

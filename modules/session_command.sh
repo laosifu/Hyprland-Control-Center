@@ -218,7 +218,7 @@ tui_session_menu() {
         clear 2>/dev/null || true
         print_header "HCC Session Manager"
 
-        echo "  Available sessions:"
+        echo "  Installed sessions:"
         echo
 
         for i in "${!ids[@]}"
@@ -234,7 +234,9 @@ tui_session_menu() {
         done
 
         echo
-        printf "  %2s) %s\n" "c" "Capture current session"
+        printf "  %2s) %s\n" "n" "Native Linux (no HCC, restore $HOME)"
+        printf "  %2s) %s\n" "c" "Capture current config to active session"
+        printf "  %2s) %s\n" "l" "List available desktops in registry"
         printf "  %2s) %s\n" "q" "Quit"
         echo
 
@@ -242,16 +244,43 @@ tui_session_menu() {
 
         [[ "$choice" == "q" ]] && { echo; print_info "Bye."; break; }
 
+        if [[ "$choice" == "n" ]]; then
+            echo
+            print_warning "Restore native Linux (no HCC)?"
+            echo "  This will remove ALL HCC session symlinks and restore default Hyprland."
+            echo
+            read -rp "Restore? [y/N]: " ans
+            case "$ans" in
+                [Yy]|[Yy][Ee][Ss])
+                    session_undeploy
+                    rm -f "$(session_active_file)"
+                    print_success "Restored native Linux. Log out and select your default session."
+                    read -rp "Press Enter to continue..."
+                    ;;
+            esac
+            continue
+        fi
+
         if [[ "$choice" == "c" ]]; then
             if [[ -n "$active" ]]; then
                 echo
-                print_info "Isolating current session: $active"
+                print_info "Capturing current config to session: $active"
                 session_isolate "$active"
                 read -rp "Press Enter to continue..."
             else
-                print_info "No active session to isolate."
+                print_info "No active session to capture."
                 read -rp "Press Enter to continue..."
             fi
+            continue
+        fi
+
+        if [[ "$choice" == "l" ]]; then
+            echo
+            print_info "Available desktops in registry:"
+            desktop_registry_list 2>/dev/null | head -20 || print_info "(run 'hcc desktop list')"
+            echo
+            print_info "Install: hcc desktop install <name>"
+            read -rp "Press Enter to continue..."
             continue
         fi
 
@@ -270,13 +299,15 @@ tui_session_menu() {
         echo
         session_load "$target_id"
         print_warning "Switch to: ${SESSION_NAME:-$target_id}?"
-        echo "  This will restore config files from this session."
+        echo "  This will deploy config files from this session."
         echo
 
-        read -rp "Switch now? [y/N]: " choice
-        case "$choice" in
+        read -rp "Switch now? [y/N]: " ans
+        case "$ans" in
             [Yy]|[Yy][Ee][Ss])
                 session_switch "$target_id"
+                echo
+                print_warning "Reboot or log out and pick 'HCC' at the login screen."
                 read -rp "Press Enter to continue..."
                 ;;
         esac

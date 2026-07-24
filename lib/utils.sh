@@ -42,6 +42,7 @@ LENH:
 
     hcc doctor              Kiem tra he thong
     hcc desktop list        Xem desktop packages co san
+    hcc desktop search <tu khoa> Tim desktop tu community registry
     hcc desktop install <ten|url|dir>  Cai desktop (registry/URL/thu muc)
 
     hcc profile list        Xem profile da cai
@@ -66,6 +67,10 @@ LENH:
     hcc inventory           Kiem tra thanh phan he thong
     hcc cleanup             Xem dung luong cache
     hcc inspect <path>      Xem thong tin repository
+
+    hcc ai setup            Cai dat API key cho AI (Gemini)
+    hcc ai remove-key       Xoa API key
+    hcc ai status           Kiem tra trang thai AI
 
     hcc --version           Phien ban
     hcc help                Tro giup nay

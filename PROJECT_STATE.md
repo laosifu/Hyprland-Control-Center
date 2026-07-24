@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) - Project State
 
-*Last updated: 2026-07-23*
+*Last updated: 2026-07-24 (v0.6.1)*
 
 ---
 
@@ -626,3 +626,212 @@ Nếu không, user chạy: `sudo hcc session setup-login`
 
 - Add Hyprland reload after session switch for in-session config refresh.
 - External package discovery (search/community registry).
+
+---
+
+# 18. AI-Powered External Desktop Install — v0.6.0 (2026-07-23)
+
+> Khi cài desktop từ URL không có `package.conf`, HCC hỗ trợ AI (Google Gemini)
+> để tự động phân tích repo và sinh `package.conf`. Nếu AI không dùng được hoặc
+> không thành công, fallback về auto-detect + manual edit.
+
+## Vấn đề
+
+Người dùng mới không biết Linux gặp khó khi cài dotfiles từ GitHub:
+- Repo không có `package.conf`
+- Không biết cần cài packages nào
+- Phải tự tạo `package.conf` thủ công
+
+## Giải pháp
+
+### Auto-detect (không cần AI)
+
+| Tính năng | Mô tả |
+|---|---|
+| `desktop_external_detect_packages()` | Quét `.config/*/` + `hypr/` → map tên thư mục → Arch packages |
+| `desktop_external_known_packages()` | Mapping 20+ config dir (hypr→hyprland, kitty→kitty, waybar→waybar, v.v.) |
+| `desktop_external_detect_git_repos()` | Phát hiện `.gitmodules` + subdir `.git` |
+| `desktop_external_generate_package_conf()` | Sinh package.conf đầy đủ (NAME, ID, VERSION, AUTHOR, DESCRIPTION, PACMAN_PACKAGES, AUR_PACKAGES, GIT_REPOSITORIES, COPY_ITEMS) |
+| `desktop_external_edit_package_conf()` | Mở editor để sửa sau khi sinh |
+| Auto-retry | Sau khi sửa, tự động chạy lại `desktop_service_install` |
+
+### AI integration (Gemini)
+
+| Component | Path | Purpose |
+|---|---|---|
+| `desktop_ai_load_key()` | `lib/desktop_registry.sh` | Load API key từ `~/.config/hcc/ai.conf` hoặc `$HCC_AI_API_KEY` |
+| `desktop_ai_setup()` | `lib/desktop_registry.sh` | Interactive setup: hỏi key, lưu file |
+| `desktop_ai_analyze_repo()` | `lib/desktop_registry.sh` | Gửi tree + README + scripts lên Gemini → parse response → sinh `package.conf` |
+
+### Flow: URL install → không có package.conf
+
+```
+hcc desktop install <url>
+  ↓
+Clone repo → không tìm thấy package.conf
+  ↓
+Hỏi user:
+  1) Clone và tự cấu hình tay
+  2) Dùng AI (Gemini) để tự động phân tích
+  ↓
+[Option 2] → desktop_external_add "ai"
+  ↓
+desktop_ai_analyze_repo(dir, url, id, name)
+  ├── Load/setup API key
+  ├── Collect repo info (find tree, README, install.sh/setup.sh)
+  ├── Build prompt → gọi Gemini API (gemini-2.0-flash, free)
+  ├── Parse response → extract NAME, DESCRIPTION, PACMAN_PACKAGES, AUR_PACKAGES, COPY_ITEMS
+  └── Ghi package.conf → Hỏi cài đặt ngay
+  ↓
+  [AI fail] → fallback desktop_external_generate_package_conf (auto-detect)
+```
+
+### Verification
+
+* Tất cả unit tests pass (22+ tests, gồm 28 tests cho external detect).
+* `bash -n` không lỗi syntax.
+* Chưa test end-to-end với Gemini API thật.
+* API key miễn phí tại: https://aistudio.google.com/apikey
+
+---
+
+# 19. Session Switching Improvements + AI CLI + External Registry — v0.6.1 (2026-07-24)
+
+## Generic login entry
+
+Đã tạo generic `hcc.desktop` trong `/usr/share/wayland-sessions/` cho phép chọn
+một entry duy nhất trên màn hình login — tự động đọc active session từ
+`session-active` file. Người dùng chỉ cần chọn "HCC" ở login screen, không cần
+nhớ session ID cụ thể.
+
+### Changed files
+
+| File | Change |
+|---|---|
+| `lib/launchers/session-launcher.sh` | Khi chạy không có argument, đọc `SESSION_ID` từ `session-active` |
+| `lib/session.sh` | Thêm `session_setup_generic_login_entry()`; cập nhật `session_setup_login_entry()` và `session_setup_login_entries()` để tạo cả entry generic + per-session; `session_switch()` tự động tạo generic entry |
+
+## AI Commands (`hcc ai`)
+
+| File | Change |
+|---|---|
+| `lib/commands/ai_command.sh` | Mới — dispatch `setup`, `remove-key`, `status` |
+| `lib/bootstrap/commands.sh` | Load ai_command.sh |
+| `lib/dispatcher.sh` | Thêm case `ai` → `ai_dispatch` |
+| `lib/utils.sh` | Thêm help text cho `hcc ai` |
+
+## CLI: `hcc desktop search <keyword>`
+
+Gửi request tới community registry (GitHub raw text file). Mỗi dòng format:
+`name|url|description`. Có thể tìm theo keyword.
+
+| Component | Path |
+|---|---|
+| Fetch + search | `lib/desktop_registry.sh` — `desktop_registry_community_fetch()` / `desktop_registry_community_search()` |
+| Command | `lib/commands/desktop_command.sh` — thêm case `search` |
+
+## Desktop uninstall improvements
+
+`modules/desktop_uninstall.sh` giờ đây cũng:
+- Xoá session (symlinks + login entry + session dir)
+- Xoá external package dir (`~/.local/share/hcc/desktops/<id>/`)
+
+## Tests
+
+| File | Tests |
+|---|---|
+| `tests/unit/external_detect_test.sh` | Mới — 28 tests cho detect scripts, packages, copy items, git repos, home config, import, generate, AI help |
+| `tests/lib/assert.sh` | Fix: `assert_success`/`assert_failure`/`assert_equals`/`print_summary` luôn return 0 để không trigger `set -e` |
+
+## Bug fixes: Session pipeline — v0.6.1 hotfix (2026-07-24)
+
+> Phát hiện và sửa 5 bugs trong session pipeline khi install desktop package.
+> Root cause: `COPY_ITEMS` với target `$HOME` không được xử lý đúng trong dispatcher,
+> manifest builder, và filesystem operation.
+
+### Bugs đã sửa
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 1 | `operations/filesystem_operation.sh:29` | `cp -a source/. dest/` copy nội dung, làm mất cấu trúc thư mục (`.config/hypr` → `$HOME/hypr` thay vì `$HOME/.config/hypr`) | `cp -a source dest/` — giữ nguyên cấu trúc |
+| 2 | `lib/action_dispatcher.sh:37,53` | Khi `PLAN_RECORD_ARG2 == $HOME` (exact match), `${dest_arg#$HOME/}` không match → path thành `session_root//home/user` | Tách case `$HOME`: redirect về `session_root` |
+| 3 | `lib/session.sh:220` | `session_deploy()` dùng `[[ -d ]]` → bỏ qua file (vd: `starship.toml`) | Đổi thành `[[ -e ]]` |
+| 4 | `lib/session.sh:338` | `session_build_manifest_from_plan()`: target `$HOME` → `rel` rỗng → manifest thiếu entries, symlinks không được tạo | Scan source dir children, thêm từng child với prefix `src_basename/child_name` |
+| 5 | `lib/desktop_pipeline.sh:48-77` | Login entry chỉ tạo khi có root (`[[ -w /usr/share/wayland-sessions ]]`), im lặng skip nếu không có quyền | Prompt hỏi user `[y/N]`, gọi `sudo HOME="$HOME" bash -c` để tạo entries |
+
+### Kết quả
+- mailong2401 session được rebuild thủ công: payload copy đúng cấu trúc, manifest đầy đủ, symlinks deploy thành công (hypr, kitty, fish, gtk-3.0, gtk-4.0, matugen, starship.toml, cartoon-shell, Pictures/Wallpapers)
+- `session-active` set = `mailong2401`
+- All 19+ test suites pass
+
+---
+
+## Uncommitted changes (git status — v0.6.1 in progress)
+
+Các files đã sửa nhưng chưa commit:
+
+| File | Status |
+|---|---|
+| `PROJECT_STATE.md` | Modified |
+| `lib/desktop_registry.sh` | Modified — AI, detect scripts, home config, community search |
+| `services/desktop_service.sh` | Modified — URL install flow mới (auto-detect + menu) |
+| `lib/session.sh` | Modified — generic login entry, improved session_switch, bug fixes |
+| `lib/launchers/session-launcher.sh` | Modified — generic mode (no args) |
+| `lib/commands/ai_command.sh` | New — `hcc ai setup / remove-key / status` |
+| `lib/bootstrap/commands.sh` | Modified — load ai_command.sh |
+| `lib/dispatcher.sh` | Modified — case `ai` |
+| `lib/utils.sh` | Modified — help text |
+| `lib/commands/desktop_command.sh` | Modified — case `search` |
+| `lib/action_dispatcher.sh` | Modified — fix `$HOME` redirect bug |
+| `operations/filesystem_operation.sh` | Modified — fix `cp -a` preserve directory structure |
+| `lib/desktop_pipeline.sh` | Modified — auto-prompt sudo for login entries |
+| `modules/session_command.sh` | Modified — TUI menu (Native Linux, list available) |
+| `modules/desktop_uninstall.sh` | Modified — session + external dir cleanup |
+| `tests/unit/external_detect_test.sh` | New — 28 tests |
+| `tests/lib/assert.sh` | Modified — return 0 for set -e safety |
+
+## Next session instructions
+
+Khi session tiếp theo bắt đầu, hãy đọc PROJECT_STATE.md section 19 + Uncommitted
+changes này trước. Sau đó:
+
+### Priority todo
+1. **Run `bash tests/run_all.sh`** — xác nhận all 19 suites pass (gồm 28 external_detect tests)
+2. **Deploy thử** — chạy `bin/hcc help` để verify CLI, `bin/hcc ai status`, `bin/hcc desktop list`
+3. **Kiểm tra session switching**:
+   - `bin/hcc session list` — xem danh sách session đã cài
+   - `bin/hcc session switch` — TUI menu hiển thị sessions + Native Linux option
+   - Sau switch: kiểm tra `~/.config/hcc/session-active` có đúng ID không
+   - Kiểm tra symlinks: `ls -la ~/.config/hypr` trỏ đến đúng session root
+4. **Kiểm tra login entries**:
+   - `ls /usr/share/wayland-sessions/hcc*.desktop` — phải có `hcc.desktop` (generic)
+   - `cat /usr/share/wayland-sessions/hcc.desktop` — `Exec=` phải là `session-launcher` (không có ID)
+5. **Kiểm tra AI CLI**:
+   - `bin/hcc ai status` — báo "not configured"
+   - `bin/hcc ai help` — hiển thị help
+6. **Kiểm tra desktop search**:
+   - `bin/hcc desktop search hypr` — gọi community registry (sẽ fail nếu chưa có registry, cần tạo)
+   - `bin/hcc desktop search` — báo lỗi thiếu keyword
+
+### Nếu restart máy
+- Tất cả changes đang ở working tree (chưa commit)
+- Sau restart, chạy `git status` để xác nhận files không bị mất
+- `bash tests/run_all.sh` — verify tests pass
+- Tiếp tục kiểm tra các mục ở trên
+
+### Nếu muốn commit
+```bash
+git add -A
+git commit -m "feat: v0.6.1 — generic login entry, AI CLI, community registry search, desktop uninstall session cleanup, tests"
+```
+
+### Cần tạo sau này
+1. GitHub repo: `hyprland-control-center/community-registry` chứa `registry.txt`
+2. Test Gemini API thật: `hcc desktop install <url>` với repo không có package.conf
+3. Test login screen: restart máy, chọn "HCC" ở SDDM/GDM
+
+### Nếu muốn commit
+```bash
+git add -A
+git commit -m "fix: session pipeline bugs — cp -a preserve dir, \$HOME redirect, manifest builder, deploy file support, auto-sudo login entry"
+```

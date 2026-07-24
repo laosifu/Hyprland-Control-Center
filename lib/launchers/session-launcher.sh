@@ -1,21 +1,34 @@
 #!/usr/bin/env bash
 # HCC Session Launcher
-# Called by /usr/share/wayland-sessions/hcc-<id>.desktop
-# Deploys session symlinks and launches Hyprland with the session config.
+# Called by /usr/share/wayland-sessions/hcc-<id>.desktop or hcc.desktop (generic)
+# Generic mode (no args): reads the active session from session-active file.
+# Specific mode (arg): deploys session <id> directly.
 
 set -euo pipefail
 
 SESSION_ID="${1:-}"
-[[ -z "$SESSION_ID" ]] && {
-    echo "Usage: session-launcher <session-id>"
-    exit 1
-}
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+HCC_SESSION_ACTIVE_FILE="$XDG_CONFIG_HOME/hcc/session-active"
+
+# Generic mode: read active session
+if [[ -z "$SESSION_ID" ]]; then
+    if [[ -f "$HCC_SESSION_ACTIVE_FILE" ]]; then
+        SESSION_ID="$(head -n 1 "$HCC_SESSION_ACTIVE_FILE")"
+    fi
+    if [[ -z "$SESSION_ID" ]]; then
+        echo "HCC: No active session found."
+        echo "Install a desktop first or run: hcc session switch"
+        exit 1
+    fi
+fi
+
 HCC_SESSION_BASE="$XDG_CONFIG_HOME/hcc/sessions"
 SESSION_DIR="$HCC_SESSION_BASE/$SESSION_ID"
 SESSION_ROOT="$SESSION_DIR/root"
 MANIFEST="$SESSION_DIR/manifest"
+
+echo "HCC Session: $SESSION_ID"
 
 # Deploy session symlinks
 if [[ -f "$MANIFEST" ]]; then
@@ -33,7 +46,7 @@ fi
 
 # Mark active
 mkdir -p "$(dirname "$HCC_SESSION_ACTIVE_FILE")"
-printf '%s\n' "$SESSION_ID" > "$XDG_CONFIG_HOME/hcc/session-active"
+printf '%s\n' "$SESSION_ID" > "$HCC_SESSION_ACTIVE_FILE"
 
 # Find Hyprland config
 HYPR_CONF=""
@@ -51,7 +64,6 @@ done
     exit 1
 }
 
-echo "HCC Session: $SESSION_ID"
 echo "Config: $HYPR_CONF"
 
 exec Hyprland --config "$HYPR_CONF"

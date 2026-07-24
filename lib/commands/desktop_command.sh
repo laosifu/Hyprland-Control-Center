@@ -12,6 +12,16 @@ desktop_dispatch() {
 
             ;;
 
+        search)
+
+            shift
+
+            log_info "Searching community registry"
+
+            desktop_registry_community_search "$@"
+
+            ;;
+
         install)
 
             shift
@@ -34,7 +44,7 @@ desktop_dispatch() {
 
         *)
 
-            print_error "Usage: hcc desktop <list|install|uninstall> [name]"
+            print_error "Usage: hcc desktop <list|search|install|uninstall> [name]"
 
             ;;
 

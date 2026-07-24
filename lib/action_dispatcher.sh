@@ -34,7 +34,9 @@ dispatch_action() {
 
             if [[ -n "$session_root_dir" ]]; then
                 dest_arg="${dest_arg/#\~/$HOME}"
-                if [[ "$dest_arg" == "$HOME/"* ]] || [[ "$dest_arg" == "$HOME" ]]; then
+                if [[ "$dest_arg" == "$HOME" ]]; then
+                    dest_arg="$session_root_dir"
+                elif [[ "$dest_arg" == "$HOME/"* ]]; then
                     dest_arg="$session_root_dir/${dest_arg#$HOME/}"
                 fi
             fi
@@ -50,7 +52,9 @@ dispatch_action() {
 
             if [[ -n "$session_root_dir" ]]; then
                 dest_arg="${dest_arg/#\~/$HOME}"
-                if [[ "$dest_arg" == "$HOME/"* ]] || [[ "$dest_arg" == "$HOME" ]]; then
+                if [[ "$dest_arg" == "$HOME" ]]; then
+                    dest_arg="$session_root_dir"
+                elif [[ "$dest_arg" == "$HOME/"* ]]; then
                     dest_arg="$session_root_dir/${dest_arg#$HOME/}"
                 fi
             fi

@@ -217,7 +217,7 @@ session_deploy() {
         target_dir="$(dirname "$target")"
         local session_path="$session_root_dir/$rel_path"
 
-        [[ -d "$session_path" ]] || {
+        [[ -e "$session_path" ]] || {
             print_warning "Session path not found: $session_path"
             continue
         }
@@ -294,10 +294,21 @@ session_switch() {
     print_info "Deploying session: $target_id"
     session_deploy "$target_id"
 
+    session_setup_generic_login_entry 2>/dev/null || true
+
     echo
     print_success "Session switched to: $target_id"
-    print_info "Log out and log in to start Hyprland with the new session."
-    print_info "(Or run 'hyprctl reload')"
+    echo
+    print_info "=== Next step ==="
+    print_info "1) Log out and pick 'HCC' from the login screen to start with this session."
+    print_info "2) Or pick 'HCC - $target_id' for direct access."
+    print_info "3) Or run 'hyprctl reload' to apply config changes now."
+    echo
+    print_info "Available login options:"
+    print_info "  - HCC               (generic — loads the active session)"
+    print_info "  - HCC - $target_id (direct — always loads this session)"
+    echo
+    print_warning "If the login screen shows no HCC entry, run: sudo hcc session setup-login"
 }
 
 session_remove() {
@@ -332,7 +343,30 @@ session_build_manifest_from_plan() {
         plan_record_read "$action"
 
         case "$PLAN_RECORD_TYPE" in
-            COPY_DIRECTORY|CLONE_REPOSITORY)
+            COPY_DIRECTORY)
+                dest="${PLAN_RECORD_ARG2/#\~/$HOME}"
+                rel="${dest/#$HOME\//}"
+
+                if [[ "$rel" == "$dest" ]]; then
+                    local src_dir="$PLAN_RECORD_ARG1"
+                    local src_basename
+                    src_basename="$(basename "$src_dir")"
+                    if [[ -d "$src_dir" ]]; then
+                        local child
+                        for child in "$src_dir"/*; do
+                            [[ -e "$child" ]] || continue
+                            local child_name
+                            child_name="$(basename "$child")"
+                            session_manifest_add "$id" "$src_basename/$child_name"
+                        done
+                    fi
+                    found=true
+                else
+                    session_manifest_add "$id" "$rel"
+                    found=true
+                fi
+                ;;
+            CLONE_REPOSITORY)
                 dest="${PLAN_RECORD_ARG2/#\~/$HOME}"
                 rel="${dest/#$HOME\//}"
                 [[ "$rel" == "$dest" ]] && continue
@@ -343,6 +377,28 @@ session_build_manifest_from_plan() {
     done
 
     [[ "$found" == true ]]
+}
+
+session_setup_generic_login_entry() {
+    local desktop_file="/usr/share/wayland-sessions/hcc.desktop"
+
+    if [[ -f "$desktop_file" ]]; then
+        return 0
+    fi
+
+    if [[ ! -w "/usr/share/wayland-sessions" ]]; then
+        return 1
+    fi
+
+    cat > "$desktop_file" << EOF
+[Desktop Entry]
+Name=HCC
+Comment=Hyprland Control Center — loads the active HCC session
+Exec=/usr/lib/hcc/session-launcher
+Type=Application
+DesktopNames=Hyprland
+EOF
+    print_success "Generic login entry created: $desktop_file"
 }
 
 session_setup_login_entry() {
@@ -370,6 +426,8 @@ EOF
             print_info "Login entry not created (need root). Run: sudo hcc session setup-login"
         fi
     fi
+
+    session_setup_generic_login_entry
 }
 
 session_setup_login_entries() {
@@ -377,6 +435,8 @@ session_setup_login_entries() {
     local name
     local hypr_config
     local desktop_file
+
+    session_setup_generic_login_entry
 
     for id in $(session_list)
     do
