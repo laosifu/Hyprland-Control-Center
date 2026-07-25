@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
 planner_package() {
+    local pkg_list="${PACKAGES:-${PACMAN_PACKAGES:-}}"
+    local pkg
 
-    local package
-
-    for package in ${PACMAN_PACKAGES:-}
+    for pkg in $pkg_list
     do
-        plan_install_package "$package"
+        plan_install_package "$pkg"
     done
-
 }

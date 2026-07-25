@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
 package_query_is_installed() {
-
-    pacman -Qi "$1" >/dev/null 2>&1
-
+    pm_installed "$1"
 }

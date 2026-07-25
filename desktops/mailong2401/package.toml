@@ -1,0 +1,34 @@
+name = "Mailong2401 Desktop"
+id = "mailong2401"
+version = "1.0"
+author = "Mailong2401"
+description = "Hyprland desktop package with Quickshell cartoon-shell"
+supported_distros = ["arch", "endeavouros", "cachyos"]
+reboot_required = true
+
+[packages]
+required = [
+    "base-devel", "hyprland", "kitty", "brightnessctl",
+    "wl-clipboard", "noto-fonts-cjk", "nautilus", "grim",
+    "slurp", "xdg-desktop-portal-hyprland", "jq",
+    "matugen", "starship", "fish", "adw-gtk-theme", "bc",
+    "qt6-multimedia"
+]
+aur = [
+    "quickshell-git", "sysstat", "papirus-icon-theme",
+    "ttf-material-symbols-variable-git", "otf-comicshanns-nerd",
+    "cava", "qt6-5compat"
+]
+
+[config]
+payload_root = "desktops/mailong2401/payload"
+install_path = "~"
+copy_items = [
+    ".config|~",
+    "Pictures|~"
+]
+
+[git]
+repositories = [
+    { url = "https://github.com/mailong2401/cartoon-shell.git", path = "~/.config/quickshell/cartoon-shell" }
+]

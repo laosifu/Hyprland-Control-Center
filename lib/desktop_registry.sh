@@ -42,20 +42,33 @@ desktop_registry_package_file() {
     local id="$1"
     local path
     path="$(desktop_registry_package_path "$id")" || return 1
-    echo "$path/package.conf"
+
+    if [[ -f "$path/package.toml" ]]; then
+        echo "$path/package.toml"
+    elif [[ -f "$path/package.conf" ]]; then
+        echo "$path/package.conf"
+    else
+        return 1
+    fi
 }
 
 desktop_registry_load_package() {
     local id="$1"
     local file
     file="$(desktop_registry_package_file "$id")" || return 1
-    [[ -f "$file" ]] || return 1
     unset NAME ID VERSION AUTHOR DESCRIPTION SUPPORTED_DISTROS
     unset PACKAGE_ROOT CONFIG_ROOT ASSETS_ROOT REBOOT_REQUIRED
     unset PACKAGE_ROOT_DIR
     unset PACMAN_PACKAGES AUR_PACKAGES GIT_REPOSITORIES COPY_ITEMS
-    # shellcheck disable=SC1090
-    source "$file"
+    unset PACKAGES PACKAGES__LEN AUR__LEN
+    unset GIT_REPOSITORIES_0_URL GIT_REPOSITORIES_0_PATH GIT_REPOSITORIES_0_PATH_0
+    unset GIT_REPOSITORIES__LEN
+
+    config_read "$file"
+
+    if [[ "$file" == *.toml ]]; then
+        config_toml_to_legacy
+    fi
 }
 
 desktop_registry_validate() {
