@@ -133,25 +133,6 @@ assert_equals "home detect: config dirs" "true" "$(echo "${home_lines[2]}" | gre
 HOME="$OLD_HOME"
 
 # ============================================================
-# Test: desktop_external_import_home_to_session
-# ============================================================
-export HOME="$TESTDIR/home2"
-mkdir -p "$HOME/.config/hypr" "$HOME/.config/kitty"
-echo "test config" > "$HOME/.config/hypr/hyprland.conf"
-
-SESSION_BASE="$TESTDIR/sessions"
-mkdir -p "$SESSION_BASE/test-session/root"
-
-# Mock session_root
-session_root() { echo "$SESSION_BASE/$1/root"; }
-
-desktop_external_import_home_to_session "test-session" "hypr kitty"
-
-assert_success "import: hypr moved to session" test -f "$SESSION_BASE/test-session/root/.config/hypr/hyprland.conf"
-assert_success "import: symlink created" test -L "$HOME/.config/hypr"
-HOME="$OLD_HOME"
-
-# ============================================================
 # Test: desktop_external_show_package_conf_help (just verify no crash)
 # ============================================================
 desktop_external_show_package_conf_help > /dev/null 2>&1

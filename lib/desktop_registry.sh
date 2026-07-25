@@ -596,24 +596,6 @@ desktop_external_detect_from_home_config() {
     echo "${seen_dirs# }"
 }
 
-desktop_external_import_home_to_session() {
-    local id="$1"
-    local session_root_dir
-    session_root_dir="$(session_root "$id")" || return 1
-    local dirs="$2"
-    local d
-    for d in $dirs; do
-        local src="$HOME/.config/$d"
-        local dst="$session_root_dir/.config/$d"
-        [[ -d "$src" ]] || continue
-        mkdir -p "$(dirname "$dst")" 2>/dev/null || true
-        if mv "$src" "$dst" 2>/dev/null; then
-            ln -sf "$dst" "$src"
-            print_info "  Imported .config/$d vao session root"
-        fi
-    done
-}
-
 desktop_external_run_script_and_detect() {
     local dir="$1"
     local id="$2"
@@ -766,10 +748,6 @@ EOF
         if [[ -n "$aur_home" ]]; then
             print_info "Phat hien AUR: $aur_home"
         fi
-        echo
-        print_info "Dang import cau hinh vao session root..."
-        desktop_external_import_home_to_session "$id" "$config_dirs"
-        echo
         return 0
     fi
 

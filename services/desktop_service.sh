@@ -286,11 +286,6 @@ desktop_service_install() {
         return 1
     }
 
-    profile_ownership_record_plan "$ID" || {
-        [[ "$is_url" == true && -d "$external_dir" ]] && rm -rf "$external_dir"
-        return 1
-    }
-
     profile_registry_activate "$ID" || {
         [[ "$is_url" == true && -d "$external_dir" ]] && rm -rf "$external_dir"
         return 1

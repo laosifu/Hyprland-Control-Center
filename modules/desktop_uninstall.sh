@@ -118,12 +118,6 @@ run_desktop_uninstall() {
                 print_success "Removed profile: $id"
             fi
 
-            if session_exists "$id" 2>/dev/null; then
-                print_info "Cleaning up session: $id"
-                session_remove "$id"
-                print_success "Session removed: $id"
-            fi
-
             if desktop_external_exists "$id" 2>/dev/null; then
                 local ext_dir
                 ext_dir="$(desktop_external_package_dir "$id")"

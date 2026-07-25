@@ -21,7 +21,7 @@ echo
 #
 # 1. Detect OS
 #
-info "[1/5] Kiểm tra hệ điều hành..."
+info "[1/6] Kiểm tra hệ điều hành..."
 
 os_id=""
 if [[ -f /etc/os-release ]]; then
@@ -40,7 +40,7 @@ esac
 #
 # 2. Check dependencies
 #
-info "[2/5] Kiểm tra công cụ cần thiết..."
+info "[2/6] Kiểm tra công cụ cần thiết..."
 
 for cmd in bash git sudo; do
     if command -v "$cmd" &>/dev/null; then
@@ -62,7 +62,7 @@ fi
 #
 # 3. Clone/Update repo
 #
-info "[3/5] Cài đặt HCC..."
+info "[3/6] Cài đặt HCC..."
 
 install_dir="$HOME/.local/share/hcc"
 
@@ -80,7 +80,7 @@ fi
 #
 # 4. Add to PATH
 #
-info "[4/5] Thêm HCC vào PATH..."
+info "[4/6] Thêm HCC vào PATH..."
 
 bin_dir="$HOME/.local/bin"
 mkdir -p "$bin_dir"
@@ -106,9 +106,19 @@ fi
 #
 # 5. Initialize config
 #
-info "[5/5] Khởi tạo cấu hình..."
+info "[5/6] Khởi tạo cấu hình..."
 
 "$bin_dir/hcc" --version &>/dev/null && ok "  HCC hoạt động!" || fail "  HCC không chạy được."
+
+#
+# 6. Install session launcher (cần root)
+#
+info "[6/6] Cài đặt session launcher cho màn hình login..."
+sudo mkdir -p /usr/lib/hcc 2>/dev/null && \
+sudo cp "$install_dir/lib/launchers/session-launcher.sh" /usr/lib/hcc/session-launcher && \
+sudo chmod +x /usr/lib/hcc/session-launcher && \
+ok "  Session launcher installed: /usr/lib/hcc/session-launcher" || \
+warn "  Không cài được session launcher. Chạy sau: sudo hcc session setup-login"
 
 echo
 echo "========================================"

@@ -20,11 +20,4 @@ profile_registry_load test-profile
 [[ "$PROFILE_NAME" == "Test Profile" ]]
 [[ "$PROFILE_PREVIOUS_SNAPSHOT" == /tmp/snapshot ]]
 
-plan_reset
-plan_add "COPY_DIRECTORY|/source|/destination"
-profile_ownership_record_plan test-profile
-
-grep -Fqx 'COPY_DIRECTORY|/source|/destination' \
-    "$(profile_registry_directory test-profile)/ownership.plan"
-
 echo "[PASS] profile registry"
