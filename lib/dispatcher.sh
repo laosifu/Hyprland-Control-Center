@@ -2,7 +2,7 @@
 
 dispatch_command() {
 
-    local cmd="${1:-help}"
+    local cmd="${1:-tui}"
 
     shift || true
 
