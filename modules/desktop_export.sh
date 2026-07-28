@@ -1,5 +1,5 @@
 run_desktop_export() {
-    local id="$1"
+    local id="${1:-}"
     local export_dir="${2:-.}"
 
     if [[ -z "$id" ]]; then
