@@ -2,25 +2,18 @@
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-#
-# Bootstrap
-#
+if [[ "$(dirname "${BASH_SOURCE[0]}")" == "/usr/bin" ]]; then
+    PROJECT_ROOT="/usr/share/hcc"
+else
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
 
 source "$PROJECT_ROOT/lib/bootstrap.sh"
 source "$PROJECT_ROOT/services/bootstrap.sh"
 source "$PROJECT_ROOT/modules/bootstrap.sh"
 execution_set_command_context "$@"
-#
-# Dispatcher
-#
 
 source "$PROJECT_ROOT/lib/dispatcher.sh"
-
-#
-# Startup
-#
 
 load_config
 
