@@ -46,6 +46,7 @@ LENH:
     hcc desktop install <ten|url|dir>  Cai desktop (registry/URL/thu muc)
     hcc desktop update <id>            Cap nhat desktop da cai
     hcc desktop init [dir]             Tao desktop profile moi (wizard)
+    hcc desktop submit [id]            Gui desktop len community registry
 
     hcc profile list        Xem profile da cai
     hcc profile status      Xem profile dang dung

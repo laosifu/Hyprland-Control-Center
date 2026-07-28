@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm \
+            bash git curl sudo \
+            python python-tomli \
+            which
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run unit tests
+        run: bash tests/run_all.sh
+
+      - name: Run CLI tests
+        run: bash tests/run_cli_tests.sh
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning
+          ignore_paths: >-
+            tests/fixtures

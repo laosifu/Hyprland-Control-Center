@@ -1,13 +1,14 @@
-#!/usr/bin/env bash
-
-dependency_install_pacman() {
-
-    sudo pacman -S --needed "$@"
-
+dependency_check_installed() {
+    local pkg="$1"
+    pm_installed "$pkg"
 }
 
-dependency_install_aur() {
+dependency_check_command() {
+    local cmd="$1"
+    command -v "$cmd" &>/dev/null
+}
 
-    yay -S --needed "$@"
-
+dependency_check_available() {
+    local pkg="$1"
+    pm_available "$pkg"
 }

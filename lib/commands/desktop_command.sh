@@ -62,9 +62,19 @@ desktop_dispatch() {
 
             ;;
 
+        submit)
+
+            shift
+
+            log_info "Submitting to community registry"
+
+            run_desktop_submit "$@"
+
+            ;;
+
         *)
 
-            print_error "Usage: hcc desktop <list|search|install|uninstall|update|init> [name]"
+            print_error "Usage: hcc desktop <list|search|install|uninstall|update|init|submit> [name]"
 
             ;;
 

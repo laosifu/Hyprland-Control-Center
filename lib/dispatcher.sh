@@ -32,6 +32,16 @@ dispatch_command() {
 
             ;;
 
+        get)
+
+            shift
+
+            log_info "Running super command: get"
+
+            run_get "$@"
+
+            ;;
+
         inventory)
 
             inventory_dispatch "$@"

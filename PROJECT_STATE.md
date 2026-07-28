@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) - Project State
 
-*Last updated: 2026-07-25 (v0.7.0)*
+*Last updated: 2026-07-25 (v0.8.0)*
 
 ---
 
@@ -159,7 +159,16 @@ Core layers:
 | `hcc desktop update` | ✅ Complete (v0.7.0) |
 | `hcc desktop init` (wizard) | ✅ Complete (v0.7.0) |
 | Batch Install (`pm_install_all`) | ✅ Complete (v0.7.0) |
-| English Documentation | ✅ Partial (README.en.md, ARCHITECTURE.en.md) |
+| English Documentation | ✅ Partial (README.en.md, ARCHITECTURE.md) |
+| `hcc desktop init` (wizard) | ✅ Complete (v0.7.0) |
+| `hcc desktop submit` | ✅ Complete (v0.8.0) |
+| `hcc get <profile>` (super cmd) | ✅ Complete (v0.8.0) |
+| CI Pipeline (GitHub Actions) | ✅ Complete (v0.8.0) |
+| AUR PKGBUILD (hcc-bin, hcc-git) | ✅ Prepared (v0.8.0) |
+| ShellCheck CI | ✅ Complete (v0.8.0) |
+| Tech Debt: Action Engine | ✅ Refactored (v0.8.0) |
+| Tech Debt: Deployment Service | ✅ Refactored (v0.8.0) |
+| Tech Debt: Dependency Service | ✅ Refactored (v0.8.0) |
 
 ---
 
@@ -370,9 +379,9 @@ All 36 tests pass.
 
 | Item | Status | Notes |
 |---|---|---|
-| Action Engine | Stub | Currently prints action payload only |
-| Deployment Service | Placeholder | Pipeline exists inside desktop pipeline |
-| Dependency Service | Needs redesign | Performs installation rather than dependency management |
+| Action Engine | ✅ Refactored (v0.8.0) | Now uses `action_engine_execute_plan()` |
+| Deployment Service | ✅ Refactored (v0.8.0) | Extracted from desktop_pipeline |
+| Dependency Service | ✅ Refactored (v0.8.0) | Now checks dependencies instead of installing |
 | Session isolation code | Removed | Was causing login-screen freezes |
 | Distro support | Arch-only tested | Package abstraction layer supports 8 PMs but untested |
 | English documentation | Partial | README.en.md exists, ARCHITECTURE.md is bilingual |
@@ -538,22 +547,21 @@ Interactive wizard that:
 
 ## Short-term
 
-1. **Test Gemini API end-to-end** — install from real URL without package.conf
-2. **Community registry** — create `hyprland-control-center/community-registry` GitHub repo + wire `hcc desktop search`
-3. **Test on non-Arch distro** — Fedora/Ubuntu VM to validate package abstraction layer + flatpak
+1. **Create community-registry GitHub repo** — `hyprland-control-center/community-registry` với `registry.txt`
+2. **Publish AUR packages** — upload `dist/aur/hcc-bin` and `dist/aur/hcc-git` to AUR
+3. **Test Gemini API end-to-end** — install from real URL without package.conf
+4. **Test on non-Arch distro** — Fedora/Ubuntu VM to validate PM abstraction + flatpak
 
 ## Medium-term
 
-4. **`hcc get <profile>`** — super command: detect OS → install HCC → install profile → done
-5. **AUR package** — publish `hcc-bin` and `hcc-git` on AUR
-6. **CI pipeline** — GitHub Actions (test on Arch, Fedora, Ubuntu)
-7. **Resolve tech debt** — Action Engine, Deployment Service, Dependency Service
+5. **Enable CI on GitHub** — push `.github/workflows/test.yml` and verify it runs
+6. **Add 5+ community desktop profiles** — recruit from Hyprland community
+7. **Profile dependencies graph** — visual tree of what gets installed
 
 ## v1.0.0
 
 8. Remove bundled packages from HCC repo
-9. Full English documentation
-10. ShellCheck CI
+9. Full English documentation (README.en.md → README.md)
 
 ---
 
