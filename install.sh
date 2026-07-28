@@ -24,8 +24,10 @@ echo
 info "[1/6] Kiểm tra hệ điều hành..."
 
 os_id=""
+os_name=""
 if [[ -f /etc/os-release ]]; then
     os_id="$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')"
+    os_name="$(grep ^NAME= /etc/os-release | cut -d= -f2 | tr -d '"')"
 fi
 
 case "$os_id" in
@@ -33,7 +35,9 @@ case "$os_id" in
         ok "Phát hiện: $os_id"
         ;;
     *)
-        fail "HCC chỉ hỗ trợ Arch Linux, EndeavourOS và CachyOS."
+        warn "OS: $os_name ($os_id) — chưa được test chính thức."
+        warn "HCC sẽ thử dùng package abstraction layer (hỗ trợ 8 PMs)."
+        warn "Nếu gặp lỗi, hãy tạo issue trên GitHub."
         ;;
 esac
 
@@ -54,9 +58,13 @@ if command -v yay &>/dev/null; then
     ok "  yay (AUR helper)"
 elif command -v paru &>/dev/null; then
     ok "  paru (AUR helper)"
+elif command -v trizen &>/dev/null; then
+    ok "  trizen (AUR helper)"
+elif command -v pamac &>/dev/null; then
+    ok "  pamac (AUR helper)"
 else
-    warn "  Không tìm thấy yay hoặc paru. HCC cần AUR helper để cài AUR packages."
-    warn "  Cài đặt: sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si"
+    warn "  Không tìm thấy AUR helper (yay/paru/trizen/pamac)."
+    warn "  AUR packages sẽ không cài được. Chỉ cài PACMAN packages."
 fi
 
 #
@@ -114,11 +122,14 @@ info "[5/6] Khởi tạo cấu hình..."
 # 6. Install session launcher (cần root)
 #
 info "[6/6] Cài đặt session launcher cho màn hình login..."
-sudo mkdir -p /usr/lib/hcc 2>/dev/null && \
-sudo cp "$install_dir/lib/launchers/session-launcher.sh" /usr/lib/hcc/session-launcher && \
-sudo chmod +x /usr/lib/hcc/session-launcher && \
-ok "  Session launcher installed: /usr/lib/hcc/session-launcher" || \
-warn "  Không cài được session launcher. Chạy sau: sudo hcc session setup-login"
+
+launcher_src="$install_dir/lib/launchers/session-launcher.sh"
+launcher_dst="/usr/lib/hcc/session-launcher"
+if sudo mkdir -p /usr/lib/hcc 2>/dev/null && sudo cp "$launcher_src" "$launcher_dst" && sudo chmod +x "$launcher_dst"; then
+    ok "  Session launcher installed: $launcher_dst"
+else
+    warn "  Không cài được session launcher. Chạy sau: sudo hcc session setup-login"
+fi
 
 echo
 echo "========================================"

@@ -52,6 +52,9 @@ detect_gpu() {
 }
 detect_display_manager() {
 
-    basename "$(readlink /etc/systemd/system/display-manager.service)" .service
+    if [[ -z "$HCC_DM" ]]; then
+        dm_detect 2>/dev/null || true
+    fi
+    echo "${HCC_DM:-unknown}"
 
 }

@@ -27,20 +27,8 @@ desktop_pipeline_finalize() {
 
     local id="${ID:-}"
 
-    if [[ -n "$id" && -w "/usr/share/wayland-sessions" ]]; then
-
-        local desktop_file="/usr/share/wayland-sessions/hcc.desktop"
-        if [[ ! -f "$desktop_file" ]]; then
-            cat > "$desktop_file" << 'EOF'
-[Desktop Entry]
-Name=HCC
-Comment=Hyprland Control Center
-Exec=/usr/lib/hcc/session-launcher
-Type=Application
-DesktopNames=Hyprland
-EOF
-        fi
-
+    if [[ -n "$id" ]]; then
+        dm_install_entry "HCC" "/usr/lib/hcc/session-launcher" 2>/dev/null || true
     fi
 
     desktop_finalize_message

@@ -42,9 +42,19 @@ desktop_dispatch() {
 
             ;;
 
+        update)
+
+            shift
+
+            log_info "Running desktop updater"
+
+            run_desktop_update "$@"
+
+            ;;
+
         *)
 
-            print_error "Usage: hcc desktop <list|search|install|uninstall> [name]"
+            print_error "Usage: hcc desktop <list|search|install|uninstall|update> [name]"
 
             ;;
 

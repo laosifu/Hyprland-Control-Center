@@ -1,12 +1,55 @@
 #!/usr/bin/env bash
 
-pm_install() {
-    local pkg
+__pm_install_batch() {
+    local pm="$1"
+    shift
+    [[ $# -eq 0 ]] && return 0
 
+    case "$pm" in
+        pacman)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo pacman -S --needed "$@"
+            ;;
+        apt)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo apt install -y "$@"
+            ;;
+        dnf)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo dnf install -y "$@"
+            ;;
+        zypper)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo zypper install -y "$@"
+            ;;
+        nix)
+            local pkg
+            for pkg in "$@"; do
+                operation_run nix profile install "nixpkgs#$pkg"
+            done
+            ;;
+        xbps)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo xbps-install -y "$@"
+            ;;
+        portage)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo emerge "$@"
+            ;;
+        apk)
+            privilege_require_root_unless_dry_run || return 1
+            operation_run sudo apk add "$@"
+            ;;
+    esac
+}
+
+pm_install() {
     [[ -n "$HCC_PM" ]] || pm_detect || { print_error "No package manager detected"; return 1; }
 
+    local to_install=()
+    local pkg mapped
+
     for pkg in "$@"; do
-        local mapped
         mapped="$(pm_map_name "$pkg")"
 
         if pm_installed "$pkg"; then
@@ -14,42 +57,13 @@ pm_install() {
             continue
         fi
 
-        print_info "Installing: $mapped ($HCC_PM)"
-
-        case "$HCC_PM" in
-            pacman)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo pacman -S --needed "$mapped"
-                ;;
-            apt)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo apt install -y "$mapped"
-                ;;
-            dnf)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo dnf install -y "$mapped"
-                ;;
-            zypper)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo zypper install -y "$mapped"
-                ;;
-            nix)
-                operation_run nix profile install "nixpkgs#$mapped"
-                ;;
-            xbps)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo xbps-install -y "$mapped"
-                ;;
-            portage)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo emerge "$mapped"
-                ;;
-            apk)
-                privilege_require_root_unless_dry_run || return 1
-                operation_run sudo apk add "$mapped"
-                ;;
-        esac
+        to_install+=("$mapped")
     done
+
+    [[ ${#to_install[@]} -eq 0 ]] && return 0
+
+    print_info "Installing (${HCC_PM}): ${to_install[*]}"
+    __pm_install_batch "$HCC_PM" "${to_install[@]}"
 }
 
 pm_install_aur() {
@@ -83,4 +97,8 @@ pm_install_aur() {
             operation_run pamac install --no-confirm "$pkg"
             ;;
     esac
+}
+
+pm_install_all() {
+    pm_install "$@"
 }

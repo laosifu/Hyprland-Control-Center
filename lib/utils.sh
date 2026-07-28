@@ -44,6 +44,7 @@ LENH:
     hcc desktop list        Xem desktop packages co san
     hcc desktop search <tu khoa> Tim desktop tu community registry
     hcc desktop install <ten|url|dir>  Cai desktop (registry/URL/thu muc)
+    hcc desktop update <id>            Cap nhat desktop da cai
 
     hcc profile list        Xem profile da cai
     hcc profile status      Xem profile dang dung
