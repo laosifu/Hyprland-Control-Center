@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOG_DIR="$PROJECT_ROOT/logs"
+LOG_DIR="${HCC_LOG_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/hcc/logs}"
 
 mkdir -p "$LOG_DIR"
 
