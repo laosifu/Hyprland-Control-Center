@@ -58,7 +58,7 @@ run_desktop_uninstall() {
     [[ "$has_repos" == true ]] && echo "  - Xoa git repos da clone"
     [[ "$has_packages" == true ]] && echo "  - Go y xoa packages (PACMAN/AUR)"
     echo "  - Xoa profile registry"
-    echo "  - Xoa session + login entry"
+    echo "  - Xoa login entry (neu co)"
 
     echo
 

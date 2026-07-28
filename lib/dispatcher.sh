@@ -96,6 +96,18 @@ dispatch_command() {
 
             ;;
 
+        self-update)
+
+            self_update_dispatch "$@"
+
+            ;;
+
+        tui|interactive)
+
+            tui_dispatch "$@"
+
+            ;;
+
         --version)
 
             echo "Hyprland Control Center v$VERSION"

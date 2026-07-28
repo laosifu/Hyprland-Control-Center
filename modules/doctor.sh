@@ -10,6 +10,8 @@ run_doctor() {
 
     doctor_health_check
 
+    doctor_recommendations
+
 }
 
 doctor_system_info() {
@@ -52,4 +54,47 @@ doctor_check() {
         print_error "[cac ha] $title"
     fi
 
+}
+
+doctor_recommendations() {
+    local has_recommendations=false
+
+    echo
+    print_header "Goi y"
+
+    if ! has_command Hyprland; then
+        echo "  • Hyprland chua duoc cai dat"
+        echo "    Giai phap: hcc desktop install <ten> (tu dong cai Hyprland)"
+        has_recommendations=true
+    fi
+
+    if ! has_command yay && ! has_command paru && ! has_command trizen && ! has_command pamac; then
+        echo "  • Khong tim thay AUR helper"
+        echo "    Giai phap: cai yay (sudo pacman -S yay) hoac paru"
+        has_recommendations=true
+    fi
+
+    local dm
+    dm="$(detect_display_manager)"
+    if [[ -z "$dm" || "$dm" == "none" ]]; then
+        echo "  • Khong phat hien Display Manager"
+        echo "    Giai phap: cai SDDM (sudo pacman -S sddm) va kich hoat (sudo systemctl enable sddm)"
+        has_recommendations=true
+    fi
+
+    if [[ ! -f "/usr/share/wayland-sessions/hcc.desktop" ]]; then
+        echo "  • Chua cau hinh login entry cho HCC"
+        echo "    Giai phap: sudo hcc session setup-login"
+        has_recommendations=true
+    fi
+
+    if ! command -v python3 &>/dev/null; then
+        echo "  • Thieu python3 (TOML parser se dung pure-bash, cham hon)"
+        echo "    Giai phap: sudo pacman -S python"
+        has_recommendations=true
+    fi
+
+    if ! $has_recommendations; then
+        echo "  Khong co goi y nao. He thong on dinh!"
+    fi
 }
