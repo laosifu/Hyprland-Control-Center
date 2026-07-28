@@ -6,3 +6,7 @@
 
 mailong2401|https://github.com/mailong2401/cartoon-shell|Hyprland + Quickshell cartoon-shell + Kitty + Fish
 end-4|https://github.com/end-4/dots-hyprland|illogical-impulse: Quickshell widgets, AI, Material Design
+prasanthrangan|https://github.com/prasanthrangan/hyprdots|Hyprdots: Extensive Hyprland rice with themes, widgets, and auto-config
+khamer|https://github.com/khamer/krisp|Krisp: Minimal Hyprland setup with Eww widgets and custom keybinds
+solDoesTech|https://github.com/solDoesTech/HyprV4|HyprV4: Gaming-focused Hyprland rice with Nvidia support
+mylinuxforwork|https://github.com/mylinuxforwork/dotfiles|ML4W Hyprland: Beginner-friendly with app launcher and widgets

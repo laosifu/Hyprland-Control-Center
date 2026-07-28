@@ -72,6 +72,16 @@ desktop_dispatch() {
 
             ;;
 
+        export)
+
+            shift
+
+            log_info "Exporting installed profile"
+
+            run_desktop_export "$@"
+
+            ;;
+
         *)
 
             print_error "Usage: hcc desktop <list|search|install|uninstall|update|init|submit> [name]"

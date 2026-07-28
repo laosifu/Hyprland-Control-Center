@@ -257,6 +257,8 @@ desktop_service_install() {
         echo
     fi
 
+    plan_show_diff
+
     if ! desktop_confirm_execution; then
         return 0
     fi
