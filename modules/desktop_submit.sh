@@ -20,8 +20,8 @@ run_desktop_submit() {
         echo "     ├── package.toml (or package.conf)"
         echo "     └── payload/"
         echo
-        print_info "2. Fork the community registry:"
-        echo "   https://github.com/hyprland-control-center/community-registry"
+        print_info "2. Fork HCC and edit registry.txt:"
+        echo "   https://github.com/laosifu/Hyprland-Control-Center"
         echo
         print_info "3. Add your entry to registry.txt:"
         echo "   Name|https://github.com/you/your-repo|Short description"
@@ -59,10 +59,10 @@ run_desktop_submit() {
 
     print_info "To submit this desktop to the community registry:"
     echo
-    print_info "1. Fork the registry:"
-    echo "   https://github.com/hyprland-control-center/community-registry"
+    print_info "1. Fork HCC and edit registry.txt:"
+    echo "   https://github.com/laosifu/Hyprland-Control-Center"
     echo
-    print_info "2. Add this line to registry.txt:"
+    print_info "2. Add this line to docs/community-registry/registry.txt:"
     echo "   ${name:-$id}|$source|${PROFILE_DESCRIPTION:-$DESCRIPTION}"
     echo
     print_info "3. Submit a Pull Request"

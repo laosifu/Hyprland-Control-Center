@@ -1,7 +1,7 @@
 # Community Registry — How to Add Your Desktop
 
-1. Fork `hyprland-control-center/community-registry` on GitHub
-2. Add your desktop entry to `registry.txt`:
+1. Fork `laosifu/Hyprland-Control-Center` on GitHub
+2. Edit `docs/community-registry/registry.txt`:
    ```
    Name|https://github.com/you/your-dotfiles|Short description
    ```
@@ -15,7 +15,7 @@ Desktop Name|git-url|Short description (max 100 chars)
 
 ## Requirements
 
-Your repo must have:
+Your repo must contain:
 - `hcc.manifest` — metadata
 - `package.toml` — package definitions (or legacy `package.conf`)
 - `payload/` — config files (optional)
