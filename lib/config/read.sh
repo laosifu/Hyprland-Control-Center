@@ -101,7 +101,7 @@ config_toml_to_legacy() {
     done
     AUR_PACKAGES="$(echo "$AUR_PACKAGES" | xargs)"
 
-    if [[ -n "$PACKAGES" && -z "$PACMAN_PACKAGES" ]]; then
+    if [[ -n "$PACKAGES" && -z "${PACMAN_PACKAGES:-}" ]]; then
         PACMAN_PACKAGES="$PACKAGES"
     fi
 
