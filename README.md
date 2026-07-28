@@ -2,206 +2,195 @@
 
 > **Cài đặt và quản lý desktop Hyprland — tự động, an toàn, dễ dàng.**
 >
-> Dành cho Arch Linux, EndeavourOS, CachyOS.
+> **Hỗ trợ:** Arch Linux · EndeavourOS · CachyOS · (9 trình quản lý gói, đa distro)
+
+<p align="center">
+  <a href="https://github.com/laosifu/Hyprland-Control-Center/actions"><img src="https://github.com/laosifu/Hyprland-Control-Center/actions/workflows/test.yml/badge.svg" alt="CI"></a>
+  <a href="https://aur.archlinux.org/packages/hcc-bin"><img src="https://img.shields.io/aur/version/hcc-bin" alt="AUR"></a>
+  <a href="https://github.com/laosifu/Hyprland-Control-Center/releases"><img src="https://img.shields.io/github/v/release/laosifu/Hyprland-Control-Center" alt="Release"></a>
+  <a href="https://github.com/laosifu/Hyprland-Control-Center/blob/main/LICENSE"><img src="https://img.shields.io/github/license/laosifu/Hyprland-Control-Center" alt="License"></a>
+</p>
 
 ---
 
 ## HCC là gì?
 
-HCC là công cụ **cài đặt desktop Hyprland** chỉ với **một câu lệnh**.
+HCC là công cụ cài đặt desktop Hyprland chỉ với **một câu lệnh**. Không cần tự cài gói, tự clone repo, tự copy file — HCC làm tất cả:
 
-Bạn không cần phải tự cài từng gói, tự clone từng repo config, tự copy từng file. HCC làm hết cho bạn:
-
-- **Tự động cài tất cả packages** (PACMAN + AUR) trên 8 trình quản lý gói (pacman, apt, dnf, zypper, nix, xbps, portage, apk)
-- **Clone config files** vào đúng chỗ từ GitHub
-- **Hỗ trợ cài từ URL** — tự động phát hiện packages từ `install.sh`, `.config/`, `.gitmodules`
+- **Quản lý gói** qua 9 trình quản lý (pacman, apt, dnf, zypper, nix, xbps, portage, apk, flatpak) + 4 AUR helpers
+- **Triển khai config** — clone từ GitHub, copy đúng vị trí
+- **Cài từ URL** — tự động phát hiện packages từ bất kỳ GitHub repo nào
 - **AI Integration** — dùng Google Gemini để phân tích repo và sinh cấu hình
-- **Tự động rollback** nếu có lỗi (transaction stack)
-- **Backup config cũ** trước khi cài mới
-- **Phát hiện file conflict** trước khi ghi đè
-- **Chuyển đổi giữa nhiều desktop** đã cài (profile system)
-- **Theme & Plugin system** — mở rộng chức năng
-- **TOML config** — định dạng cross-platform thay thế shell script
+- **Rollback tự động** — transaction stack đảm bảo undo sạch nếu lỗi
+- **Backup trước khi cài** — snapshot có timestamp
+- **Phát hiện xung đột** — cảnh báo trước khi ghi đè
+- **Chuyển đổi profile** — giữa nhiều desktop đã cài
+- **TOML config** — cross-platform, an toàn, dễ chỉnh sửa
+- **Community registry** — khám phá và chia sẻ desktop profiles
 
 ---
 
-## Installation
+## Bắt đầu nhanh
 
-### Yêu cầu
+### Từ AUR (khuyên dùng cho Arch Linux)
 
-| Thứ | Ghi chú |
-|---|---|
-| 💻 Arch Linux / EndeavourOS / CachyOS | Hỗ trợ thêm distro khác đang phát triển |
-| 🌐 Internet | Cần tải packages và config |
-| 🔐 Sudo | HCC cần quyền root để cài packages |
-| 📦 AUR helper | `yay` hoặc `paru` (tự động phát hiện) |
+```bash
+yay -S hcc-bin
+hcc doctor                       # Kiểm tra cài đặt
+hcc desktop list                 # Xem danh sách desktop
+hcc desktop install mailong2401  # Cài desktop
+```
 
-### Cách 1 — Một lệnh duy nhất (khuyên dùng)
+### Từ source (bất kỳ distro nào)
+
+```bash
+git clone https://github.com/laosifu/Hyprland-Control-Center.git
+cd Hyprland-Control-Center
+bash hcc doctor
+```
+
+### Một lệnh duy nhất
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
 ```
 
-Script sẽ tự động:
-1. Kiểm tra OS
-2. Kiểm tra dependencies (bash, git, sudo, AUR helper)
-3. Clone HCC vào `~/.local/share/hcc`
-4. Thêm `~/.local/bin` vào PATH
-5. Tạo symlink `hcc`
-6. Cài session launcher cho màn hình login
-
-Sau khi cài, **mở terminal mới** hoặc chạy:
-```bash
-source ~/.bashrc   # hoặc .zshrc / config.fish
-```
-
-### Cách 2 — Clone thủ công
-
-```bash
-git clone https://github.com/laosifu/Hyprland-Control-Center.git
-cd Hyprland-Control-Center
-bash install.sh
-```
-
-### Cách 3 — Chạy trực tiếp (không cần cài)
-
-```bash
-git clone https://github.com/laosifu/Hyprland-Control-Center.git
-cd Hyprland-Control-Center
-alias hcc='$PWD/bin/hcc'
-hcc doctor
-```
-
-### Kiểm tra sau khi cài
-
-```bash
-hcc doctor          # Kiểm tra hệ thống
-hcc desktop list    # Xem danh sách desktop có sẵn
-hcc --version       # Xem phiên bản
-```
-
 ---
 
-## Cài desktop
+## Sử dụng
 
-### Từ registry (có sẵn trong HCC)
+### Cài desktop
 
 ```bash
+# Từ registry có sẵn
 hcc desktop install mailong2401
 hcc desktop install end-4
-```
 
-### Từ GitHub URL (bất kỳ repo nào)
-
-```bash
+# Từ GitHub URL bất kỳ
 hcc desktop install https://github.com/end-4/dots-hyprland
-```
 
-HCC sẽ:
-1. Clone repo
-2. Tự động phát hiện packages (quét `.config/`, `install.sh`, `.gitmodules`)
-3. Nếu không tự động được → dùng AI (Gemini) để phân tích
-4. Nếu AI không có → hiển thị menu tương tác để bạn tự cấu hình
-
-### Từ thư mục local
-
-```bash
-hcc desktop install ./desktops/end-4
+# Từ thư mục local
 hcc desktop install ~/Downloads/my-hyprland-setup
 ```
 
-### Xem trước khi cài
+HCC hiển thị preview trước khi cài: packages, files, conflicts. Xác nhận với `y`.
 
-Trước khi cài, HCC hiển thị:
-- Tên, phiên bản, tác giả
-- Danh sách packages sẽ cài
-- File conflict (nếu có)
-- Yêu cầu xác nhận `[y/N]`
+### Super command (một chạm)
 
----
+```bash
+hcc get end-4
+```
 
-## Sau khi cài
+Tự động cài HCC (nếu thiếu) → cài desktop → thiết lập màn hình login.
+
+### Sau khi cài
 
 ```bash
 hcc profile list        # Xem các profile đã cài
 hcc profile status      # Xem profile đang dùng
-hcc profile switch <id> # Chuyển đổi active profile
+hcc profile switch <id> # Chuyển active profile
+
+sudo hcc session setup-login  # Kích hoạt màn hình login
 ```
 
-Từ màn hình login (SDDM/GDM):
+### Cập nhật / Gỡ
+
 ```bash
-sudo hcc session setup-login
-# Logout → chọn "HCC" trên màn hình login
+hcc desktop update <id>       # Kéo source mới và cài lại
+hcc desktop uninstall <id>    # Gỡ với rollback đầy đủ
 ```
 
-Gỡ desktop:
+### Tự tạo desktop package
+
 ```bash
-hcc desktop uninstall <id>
+hcc desktop init ~/my-desktop   # Wizard tương tác
+```
+
+### Chia sẻ với cộng đồng
+
+```bash
+hcc desktop submit my-desktop   # Hướng dẫn submit PR
+```
+
+### Tìm kiếm community registry
+
+```bash
+hcc desktop search minimal
+hcc desktop search hyprland
 ```
 
 ---
 
-## CLI Commands
+## Danh sách lệnh CLI (27 lệnh)
 
-### System
+### Hệ thống
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc doctor` | Kiểm tra sức khỏe hệ thống (OS, RAM, CPU, GPU, DM) | `hcc doctor` |
-| `hcc inventory` | Kiểm tra component chi tiết | `hcc inventory` |
-| `hcc cleanup` | Quét dung lượng cache (pacman, yay, cargo, pip, npm) | `hcc cleanup` |
-| `hcc inspect <path\|url>` | Inspect repository manifest | `hcc inspect ./desktops/end-4` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc doctor` | Kiểm tra sức khỏe hệ thống (OS, RAM, CPU, GPU, DM) |
+| `hcc inventory` | Kiểm tra component chi tiết |
+| `hcc cleanup` | Quét dung lượng cache (pacman, yay, cargo, pip, npm) |
+| `hcc inspect <path\|url>` | Inspect repository manifest |
 
 ### Desktop Management
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc desktop list` | Xem danh sách desktop có sẵn | `hcc desktop list` |
-| `hcc desktop search <keyword>` | Tìm kiếm community registry | `hcc desktop search minimal` |
-| `hcc desktop install <name\|url\|dir>` | Xem trước + cài desktop | `hcc desktop install end-4` |
-| `hcc desktop uninstall <id>` | Gỡ desktop + rollback | `hcc desktop uninstall end-4` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc desktop list` | Xem danh sách desktop có sẵn |
+| `hcc desktop search <keyword>` | Tìm kiếm community registry |
+| `hcc desktop install <name\|url\|dir>` | Xem trước + cài desktop |
+| `hcc desktop update <id>` | Cập nhật desktop đã cài |
+| `hcc desktop uninstall <id>` | Gỡ desktop + rollback |
+| `hcc desktop init [dir]` | Wizard tạo desktop profile |
+| `hcc desktop submit <id>` | Hướng dẫn submit lên community |
+
+### Super Command
+
+| Lệnh | Mô tả |
+|---|---|
+| `hcc get <profile>` | Cài HCC + desktop + setup login (một lần) |
 
 ### Profile Management
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc profile list` | Xem các profile đã cài | `hcc profile list` |
-| `hcc profile status` | Xem profile đang dùng | `hcc profile status` |
-| `hcc profile switch <id>` | Chuyển active profile | `hcc profile switch mailong2401` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc profile list` | Xem các profile đã cài |
+| `hcc profile status` | Xem profile đang dùng |
+| `hcc profile switch <id>` | Chuyển active profile |
 
 ### Session
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc session setup-login` | Tạo login entries cho SDDM/GDM | `sudo hcc session setup-login` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc session setup-login` | Tạo login entries cho DM |
 
 ### Backup & Restore
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc backup` | Backup config hiện tại | `hcc backup` |
-| `hcc restore [id]` | Khôi phục từ bản backup | `hcc restore` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc backup` | Backup config hiện tại |
+| `hcc restore [id]` | Khôi phục từ backup |
 
 ### Theme & Plugin
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc theme list` | Xem themes có sẵn | `hcc theme list` |
-| `hcc theme install <name>` | Cài theme | `hcc theme install example` |
-| `hcc theme uninstall <name>` | Gỡ theme | `hcc theme uninstall example` |
-| `hcc plugins` | Xem plugins có sẵn | `hcc plugins` |
-| `hcc plugin install <name>` | Cài plugin | `hcc plugin install example` |
-| `hcc plugin uninstall <name>` | Gỡ plugin | `hcc plugin uninstall example` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc theme list` | Xem themes có sẵn |
+| `hcc theme install <name>` | Cài theme |
+| `hcc theme uninstall <name>` | Gỡ theme |
+| `hcc plugins` | Xem plugins có sẵn |
+| `hcc plugin install <name>` | Cài plugin |
+| `hcc plugin uninstall <name>` | Gỡ plugin |
 
 ### AI Integration
 
-| Lệnh | Mô tả | Ví dụ |
-|---|---|---|
-| `hcc ai setup` | Cấu hình Google Gemini API key | `hcc ai setup` |
-| `hcc ai status` | Kiểm tra trạng thái AI | `hcc ai status` |
-| `hcc ai remove-key` | Xoá API key | `hcc ai remove-key` |
+| Lệnh | Mô tả |
+|---|---|
+| `hcc ai setup` | Cấu hình Google Gemini API key |
+| `hcc ai status` | Kiểm tra trạng thái AI |
+| `hcc ai remove-key` | Xoá API key |
 
-### Other
+### Khác
 
 | Lệnh | Mô tả |
 |---|---|
@@ -212,43 +201,38 @@ hcc desktop uninstall <id>
 
 ## Desktop packages có sẵn
 
-| Tên | Tác giả | Mô tả | Packages |
-|---|---|---|---|
-| `mailong2401` | Mailong2401 | Hyprland + Quickshell cartoon-shell + Kitty + Fish | 16 PACMAN + 7 AUR |
-| `end-4` | end-4 | illogical-impulse: Quickshell widgets, AI, Material Design | 75 PACMAN + 10 AUR |
+| ID | Tác giả | Packages | AUR | Mô tả |
+|---|---|---|---|---|
+| `mailong2401` | Mailong2401 | 16 | 7 | Hyprland + Quickshell cartoon-shell + Kitty + Fish |
+| `end-4` | end-4 | 75 | 10 | illogical-impulse: Quickshell widgets, AI, Material Design |
 
-Mỗi desktop đều có:
-- `package.conf` (định dạng shell, tương thích ngược)
-- `package.toml` (định dạng mới, cross-platform)
-- `payload/` chứa config files
-- `hooks/` chứa script tuỳ chỉnh (post-install, v.v.)
+Mỗi desktop gồm `package.toml`, `package.conf` (tương thích ngược), `payload/` (configs), và `hooks/`.
 
 ---
 
-## Key Features
+## Tính năng chính
 
-### Package Abstraction Layer
+### Package Abstraction (9 PMs)
 
 HCC tự động phát hiện và dùng đúng package manager:
 
-```
-pacman (Arch)  → sudo pacman -S
-apt (Debian)   → sudo apt install
-dnf (Fedora)   → sudo dnf install
-zypper (openSUSE) → sudo zypper install
-nix (NixOS)    → nix profile install
-xbps (Void)    → sudo xbps-install
-portage (Gentoo) → sudo emerge
-apk (Alpine)   → sudo apk add
-```
+| Manager | Distro | Lệnh |
+|---|---|---|
+| pacman | Arch / EndeavourOS / CachyOS | `sudo pacman -S` |
+| apt | Debian / Ubuntu / Mint | `sudo apt install` |
+| dnf | Fedora / RHEL | `sudo dnf install` |
+| zypper | openSUSE | `sudo zypper install` |
+| nix | NixOS | `nix profile install` |
+| xbps | Void | `sudo xbps-install` |
+| portage | Gentoo | `sudo emerge` |
+| apk | Alpine | `sudo apk add` |
+| flatpak | Tất cả | `flatpak install` |
 
-AUR helpers cũng tự động phát hiện: `yay`, `paru`, `trizen`, `pamac`.
-
-Package names tự động map giữa các distro (ví dụ: `fd` → `fd-find` trên Debian).
+AUR helpers: `yay`, `paru`, `trizen`, `pamac`. Tự động map tên gói giữa các distro.
 
 ### TOML Config
 
-Desktop profile chuyển sang định dạng TOML:
+Desktop profiles dùng định dạng TOML — cross-platform, an toàn, tương thích ngược:
 
 ```toml
 name = "end-4 illogical-impulse"
@@ -271,38 +255,40 @@ install_path = "~"
 post_install = "hooks/post-install.sh"
 ```
 
-Hỗ trợ song song với `package.conf` cũ.
-
 ### AI Auto-Detection
 
-Khi cài từ URL không có `package.conf`, HCC có thể dùng **Google Gemini 2.0 Flash** để:
-1. Đọc cấu trúc repo
-2. Đọc README, install scripts
-3. Sinh `package.conf` hoàn chỉnh
+Khi cài từ URL không có `package.conf`, HCC dùng **Google Gemini 2.0 Flash** để phân tích repo và sinh cấu hình hoàn chỉnh.
 
 ```bash
 hcc ai setup           # Cấu hình API key (miễn phí)
-hcc desktop install https://github.com/...  # AI tự động xử lý
+hcc desktop install https://github.com/...  # AI tự xử lý
 ```
 
-### Safe by Default
+### An toàn
 
-- **Backup** trước khi cài (timestamped snapshot)
-- **Conflict detection** — cảnh báo file sắp bị ghi đè
-- **Transaction rollback** — nếu lỗi ở bước 5, tự động undo 4 bước trước
-- **Dry-run mode** — xem trước mà không chạy thật
-- **Pre-install summary** — xem tất cả packages/files trước khi xác nhận
+- **Backup trước khi cài** — snapshot có timestamp
+- **Phát hiện xung đột** — cảnh báo trước khi ghi đè
+- **Rollback tự động** — undo khi gặp lỗi
+- **Preview** — xem tất cả trước khi xác nhận
 
-### Theme & Plugin System
+### Community Registry
 
-HCC có hệ thống theme và plugin mở rộng:
-- Theme: thay đổi giao diện Hyprland (colors, fonts, wallpapers)
-- Plugin: mở rộng tính năng (widgets, scripts, integrations)
-- Mỗi theme/plugin có `requirements.conf` để kiểm tra dependencies
+Khám phá desktop từ cộng đồng:
+
+```bash
+hcc desktop search minimal
+hcc desktop search hyprland
+```
+
+Gửi desktop của bạn qua `hcc desktop submit <id>`.
+
+### Display Manager
+
+Tự động phát hiện SDDM, GDM, LightDM, greetd. Cài session entries tự động.
 
 ---
 
-## Tự tạo desktop package
+## Tạo desktop package
 
 Tạo GitHub repo với cấu trúc:
 
@@ -317,54 +303,108 @@ repo/
         └── ...
 ```
 
-Sau đó chia sẻ link:
+Hoặc dùng wizard:
 
 ```bash
-hcc desktop install https://github.com/<bạn>/<repo>
+hcc desktop init ~/my-desktop
 ```
 
-Xem `desktops/mailong2401/` hoặc `desktops/end-4/` làm mẫu.
+Chia sẻ với cộng đồng qua `hcc desktop submit`.
 
 ---
 
-## Development
+## Phương pháp cài đặt
+
+### 1. AUR (khuyên dùng cho Arch)
+
+```bash
+yay -S hcc-bin           # Bản stable
+# hoặc
+yay -S hcc-git           # Bản phát triển
+```
+
+### 2. Một lệnh
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
+```
+
+### 3. Clone thủ công
+
+```bash
+git clone https://github.com/laosifu/Hyprland-Control-Center.git
+cd Hyprland-Control-Center
+bash install.sh
+```
+
+### 4. Chạy trực tiếp (không cần cài)
+
+```bash
+git clone https://github.com/laosifu/Hyprland-Control-Center.git
+cd Hyprland-Control-Center
+alias hcc='$PWD/bin/hcc'
+hcc doctor
+```
+
+---
+
+## Yêu cầu
+
+| Yêu cầu | Ghi chú |
+|---|---|
+| Linux | Arch / EndeavourOS / CachyOS (distro khác đang phát triển) |
+| Internet | Cần để tải packages và configs |
+| Quyền sudo | Để cài packages |
+| AUR helper | `yay`, `paru`, `trizen`, hoặc `pamac` (tự động phát hiện) |
+
+---
+
+## Phát triển
 
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center.git
 cd Hyprland-Control-Center
 
-# Chạy tất cả tests
+# Chạy tất cả 36 tests
 bash tests/run_all.sh
-
-# Chỉ chạy unit tests
-bash tests/run_all.sh
-
-# Chạy CLI tests
 bash tests/run_cli_tests.sh
 ```
 
-### Project structure
+### Cấu trúc dự án
 
 ```
 Hyprland-Control-Center/
 ├── bin/hcc              # CLI entry point
 ├── install.sh           # One-command installer
-├── VERSION              # Version file
-├── desktops/            # Desktop packages (registry.conf + package.conf/toml)
+├── VERSION              # File phiên bản
+├── desktops/            # Desktop packages (registry + package.toml/conf)
 ├── lib/                 # Core framework
-│   ├── package/         # Package abstraction layer (detect, map, install, remove, query)
+│   ├── package/         # Package abstraction (9 PMs)
 │   ├── config/          # TOML parser + config reader
-│   ├── planners/        # Plan generators (package, aur, git, copy)
+│   ├── display_manager/ # DM detection + session management
+│   ├── planners/        # Plan generators
 │   ├── renderers/       # Output formatters
-│   └── launchers/       # Session launcher for DM
-├── services/            # Service layer
+│   └── launchers/       # Session launcher cho DM
+├── services/            # Service layer (7 services)
 ├── operations/          # Atomic command wrappers
-├── modules/             # CLI command implementations
-├── handlers/            # Handler wrappers
+├── modules/             # CLI command implementations (19 modules)
 ├── plugins/             # Plugin system
 ├── themes/              # Theme system
+├── handlers/            # Handler wrappers
+├── dist/aur/            # AUR PKGBUILDs (hcc-bin, hcc-git)
+├── docs/                # Tài liệu
 └── tests/               # Test suite (36 tests)
 ```
+
+---
+
+## Kiến trúc
+
+```
+CLI → Module → Planner → Action DSL → Executor → Dispatcher → Services → Operations → Shell Commands
+```
+
+Xem chi tiết tại [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ---
 
@@ -372,47 +412,66 @@ Hyprland-Control-Center/
 
 ### "Tôi không biết gì về Linux, có dùng được không?"
 
-Có. HCC được thiết kế để bạn chỉ cần gõ **một lệnh duy nhất**.
-Tuy nhiên bạn cần máy đã cài sẵn **Arch Linux** và tài khoản có quyền `sudo`.
+Có. HCC được thiết kế để bạn chỉ cần **một câu lệnh**. Cần máy Arch Linux và quyền sudo.
 
 ### "Cài nhiều desktop có bị xung đột không?"
 
-HCC sẽ **cảnh báo** nếu file sắp bị ghi đè. Bạn có thể chọn cancel hoặc tiếp tục.
+HCC cảnh báo nếu file sắp bị ghi đè. Mỗi profile độc lập.
 
-### "Chuyển đổi giữa các desktop đã cài?"
+### "Làm sao chuyển đổi giữa các desktop?"
 
 ```bash
-hcc profile list           # Xem các profile đã cài
-hcc profile switch <id>    # Chuyển active profile
+hcc profile list
+hcc profile switch <id>
 ```
 
-Sau đó chọn từ màn hình login:
-```bash
-sudo hcc session setup-login
-# Logout → chọn "HCC" trên SDDM/GDM
-```
-
-### "Cài xong không thích, có gỡ được không?"
+### "Gỡ desktop được không?"
 
 ```bash
-hcc desktop uninstall <tên>   # Gỡ desktop + rollback config
+hcc desktop uninstall <tên>
 ```
 
 ### "HCC có hỗ trợ distro khác không?"
 
-Package abstraction layer đã hỗ trợ 8 trình quản lý gói. Tuy nhiên HCC mới chỉ được test trên Arch Linux và các distro Arch-based. Fedora/Ubuntu/NixOS support đang phát triển.
+Package layer hỗ trợ 9 PMs. Đã test trên Arch. Fedora/Ubuntu/NixOS đang phát triển.
 
 ### "Muốn chia sẻ desktop package của tôi?"
 
-Tạo GitHub repo với `package.toml`, `hcc.manifest` và `payload/`.
-Sau đó chia sẻ link:
+Tạo repo với `package.toml`, `hcc.manifest`, `payload/`. Chia sẻ link:
+
 ```bash
 hcc desktop install https://github.com/<bạn>/<repo>
 ```
 
+Sau đó submit qua `hcc desktop submit <id>`.
+
 ### "AI Integration có tốn phí không?"
 
-Google Gemini có **free tier** (60 requests/phút, đủ dùng). Chỉ cần tạo API key tại https://aistudio.google.com/apikey
+Google Gemini có **free tier** (60 requests/phút). Lấy API key tại https://aistudio.google.com/apikey
+
+### "Dữ liệu của tôi ở đâu?"
+
+| Dữ liệu | Vị trí |
+|---|---|
+| Config | `~/.config/hcc/` |
+| Profile đã cài | `~/.local/share/hcc/profiles/` |
+| Backups | `~/.local/share/hcc/backups/` |
+| Cache | `~/.cache/hcc/` |
+
+---
+
+## Lịch sử phiên bản
+
+| Phiên bản | Ngày | Nổi bật |
+|---|---|---|
+| v0.8.0 | 2026-07-28 | AUR packages, community registry, super command, CI/CD |
+| v0.7.0 | 2026-07-25 | Flatpak, batch install, DM abstraction, init wizard |
+| v0.6.0 | 2026-07-24 | TOML config, Python parser, Gemini AI |
+| v0.5.0 | 2026-07-23 | Profile system, session launcher |
+| v0.4.0 | 2026-07-22 | Desktop registry, URL install |
+| v0.3.0 | 2026-07-22 | Plugin/theme system |
+| v0.2.0 | 2026-07-21 | Backup/restore, test framework |
+| v0.1.0 | 2026-07-20 | Initial release |
 
 ---
 

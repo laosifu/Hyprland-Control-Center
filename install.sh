@@ -119,6 +119,33 @@ info "[5/6] Khởi tạo cấu hình..."
 "$bin_dir/hcc" --version &>/dev/null && ok "  HCC hoạt động!" || fail "  HCC không chạy được."
 
 #
+# 5b. Install shell completions
+#
+completion_installed=false
+bash_comp_dir="/usr/share/bash-completion/completions"
+fish_comp_dir="$HOME/.config/fish/completions"
+
+if [[ -d "$bash_comp_dir" ]]; then
+    if sudo cp "$install_dir/completions/hcc.bash" "$bash_comp_dir/hcc" 2>/dev/null; then
+        ok "  Bash completions installed"
+        completion_installed=true
+    fi
+fi
+
+if [[ -d "$fish_comp_dir" ]] || mkdir -p "$fish_comp_dir" 2>/dev/null; then
+    if cp "$install_dir/completions/hcc.fish" "$fish_comp_dir/hcc.fish" 2>/dev/null; then
+        ok "  Fish completions installed"
+        completion_installed=true
+    fi
+fi
+
+if $completion_installed; then
+    ok "  Shell completions installed"
+else
+    warn "  Không cài được shell completions (thiếu quyền hoặc thư mục)"
+fi
+
+#
 # 6. Install session launcher (cần root)
 #
 info "[6/6] Cài đặt session launcher cho màn hình login..."

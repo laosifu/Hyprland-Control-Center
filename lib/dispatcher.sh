@@ -90,6 +90,12 @@ dispatch_command() {
 
             ;;
 
+        session)
+
+            session_dispatch "$@"
+
+            ;;
+
         --version)
 
             echo "Hyprland Control Center v$VERSION"
