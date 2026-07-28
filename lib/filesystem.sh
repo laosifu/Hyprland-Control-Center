@@ -7,6 +7,10 @@ copy_if_exists() {
 
     if [[ -e "$src" ]]; then
 
+        if [[ -L "$dst" ]]; then
+            rm -f "$dst"
+        fi
+
         cp -a "$src" "$dst"
 
         print_success "$src"

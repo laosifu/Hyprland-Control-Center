@@ -23,6 +23,18 @@ filesystem_operation_copy_directory() {
     local source="$1"
     local destination="$2"
 
+    local item
+    for item in "$source"/* "$source"/.*; do
+        [[ -e "$item" ]] || continue
+        local basename_item
+        basename_item="$(basename "$item")"
+        [[ "$basename_item" == "." || "$basename_item" == ".." ]] && continue
+        local dest_path="$destination/$basename_item"
+        if [[ -L "$dest_path" ]]; then
+            rm -f "$dest_path"
+        fi
+    done
+
     operation_run \
         cp \
         -a \
