@@ -44,7 +44,7 @@ run_get() {
     if [[ -n "$profile_id" ]]; then
         echo
         print_info "Setting up login screen..."
-        sudo hcc session setup-login 2>/dev/null || \
+        hcc session setup-login 2>/dev/null || \
             print_warning "Run later: sudo hcc session setup-login"
     fi
 

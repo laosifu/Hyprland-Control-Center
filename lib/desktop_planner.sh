@@ -18,6 +18,11 @@ desktop_generate_plan() {
     planner_package
 
     #
+    # Flatpak
+    #
+    planner_flatpak
+
+    #
     # AUR
     #
     planner_aur

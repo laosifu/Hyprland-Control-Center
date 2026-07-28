@@ -11,6 +11,17 @@ plan_install_package() {
 
 }
 
+plan_install_flatpak() {
+
+    local app="$1"
+
+    plan_add \
+    "$(plan_record_create \
+        INSTALL_FLATPAK \
+        "$app")"
+
+}
+
 plan_install_aur() {
 
     local package="$1"

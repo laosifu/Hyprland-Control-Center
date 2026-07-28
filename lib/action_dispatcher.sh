@@ -14,6 +14,12 @@ dispatch_action() {
                 "$PLAN_RECORD_ARG1"
             ;;
 
+        INSTALL_FLATPAK)
+
+            operation_run flatpak install -y flathub \
+                "$PLAN_RECORD_ARG1"
+            ;;
+
         INSTALL_AUR)
 
             aur_service_install \

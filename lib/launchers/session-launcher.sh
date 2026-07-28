@@ -5,7 +5,9 @@
 
 SESSION_ID="${1:-}"
 
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+HCC_USER_HOME="${HCC_REAL_HOME:-$HOME}"
+
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HCC_USER_HOME/.config}"
 HCC_ACTIVE_FILE="$XDG_CONFIG_HOME/hcc/session-active"
 
 if [[ -z "$SESSION_ID" ]]; then

@@ -147,6 +147,16 @@ desktop_service_install() {
                     return $?
                 fi
 
+                if desktop_ai_load_key 2>/dev/null; then
+                    print_info "Dang thu phan tich bang AI..."
+                    if desktop_ai_analyze_repo "$ext_dir" "$desktop" "$ext_id" "$ext_name"; then
+                        print_info "Tien hanh cai dat..."
+                        echo
+                        desktop_service_install "$ext_id"
+                        return $?
+                    fi
+                fi
+
                 print_warning "Khong the tu dong phat hien packages."
                 echo
                 local help_loop=true
@@ -154,12 +164,13 @@ desktop_service_install() {
                     print_info "=== Khong phat hien duoc packages ==="
                     echo
                     print_info "  1) Huong dan dinh dang package.conf"
-                    print_info "  2) Chay script cai dat tu repo (install.sh/setup.sh) + tu dong phat hien"
-                    print_info "  3) Mo editor soan package.conf thu cong"
+                    print_info "  2) Phan tich bang AI (Gemini)"
+                    print_info "  3) Chay script cai dat tu repo (install.sh/setup.sh) + tu dong phat hien"
+                    print_info "  4) Mo editor soan package.conf thu cong"
                     print_info "  0) Huy, de tu cau hinh tay sau"
                     echo
                     local choice
-                    read -rp "Chon [1/2/3/0] (Enter=3): " choice
+                    read -rp "Chon [1/2/3/4/0] (Enter=4): " choice
                     case "$choice" in
                         1)
                             desktop_external_show_package_conf_help
@@ -167,6 +178,15 @@ desktop_service_install() {
                             read -rp "Enter de quay lai menu..."
                             ;;
                         2)
+                            if desktop_ai_analyze_repo "$ext_dir" "$desktop" "$ext_id" "$ext_name"; then
+                                print_info "Tien hanh cai dat..."
+                                echo
+                                desktop_service_install "$ext_id"
+                                return $?
+                            fi
+                            read -rp "Enter de quay lai menu..."
+                            ;;
+                        3)
                             if desktop_external_run_script_and_detect "$ext_dir" "$ext_id" "$ext_name" "$desktop"; then
                                 print_info "Tien hanh cai dat..."
                                 echo
@@ -174,7 +194,7 @@ desktop_service_install() {
                                 return $?
                             fi
                             ;;
-                        3|"")
+                        4|"")
                             desktop_external_edit_package_conf "$ext_id"
                             echo
                             print_info "Thu lai ngay..."

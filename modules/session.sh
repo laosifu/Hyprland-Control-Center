@@ -4,6 +4,9 @@ session_dispatch() {
     case "$action" in
         setup-login)
             if [[ "$(id -u)" -ne 0 ]]; then
+                if command -v sudo &>/dev/null; then
+                    exec sudo HCC_REAL_USER="$USER" HCC_REAL_HOME="$HOME" "$0" session setup-login "$@"
+                fi
                 print_error "Can session setup-login can sudo"
                 echo "  sudo hcc session setup-login"
                 return 1

@@ -10,3 +10,7 @@ prasanthrangan|https://github.com/prasanthrangan/hyprdots|Hyprdots: Extensive Hy
 khamer|https://github.com/khamer/krisp|Krisp: Minimal Hyprland setup with Eww widgets and custom keybinds
 solDoesTech|https://github.com/solDoesTech/HyprV4|HyprV4: Gaming-focused Hyprland rice with Nvidia support
 mylinuxforwork|https://github.com/mylinuxforwork/dotfiles|ML4W Hyprland: Beginner-friendly with app launcher and widgets
+JaKooLit|https://github.com/JaKooLit/Hyprland-Dots|Feature-rich Hyprland rice with Waybar, Rofi, and multi-distro support
+HyDE|https://github.com/HyDE-Project/HyDE|HyDE: Minimal, clean Hyprland desktop with extensive theming
+R7rainz|https://github.com/R7rainz/dotfiles|Rainz Arch Hyprland rice with Noctalia Shell, Ghostty, and Fish
+lukaszkowalik2|https://github.com/lukaszkowalik2/dotfiles|Rosé Pine themed Hyprland with Waybar, Wofi, and Pyprland

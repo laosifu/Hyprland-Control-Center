@@ -93,6 +93,14 @@ config_toml_to_legacy() {
     done
     PACKAGES="$(echo "$PACKAGES" | xargs)"
 
+    FLATPAK_PACKAGES=""
+    for ((i=0; i<${PACKAGES_FLATPAK__LEN:-0}; i++)); do
+        local var="PACKAGES_FLATPAK_${i}"
+        pkg="${!var}"
+        FLATPAK_PACKAGES="$FLATPAK_PACKAGES $pkg"
+    done
+    FLATPAK_PACKAGES="$(echo "$FLATPAK_PACKAGES" | xargs)"
+
     AUR_PACKAGES=""
     for ((i=0; i<${PACKAGES_AUR__LEN:-0}; i++)); do
         local var="PACKAGES_AUR_${i}"

@@ -19,6 +19,11 @@ render_action() {
             ui_field "Install" "$arg1"
             ;;
 
+        INSTALL_FLATPAK)
+
+            ui_field "Install Flatpak" "$arg1"
+            ;;
+
         INSTALL_AUR)
 
             ui_field "Install AUR" "$arg1"

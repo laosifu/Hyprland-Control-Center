@@ -2,7 +2,7 @@
 
 > **Install and manage Hyprland desktops — automated, safe, and easy.**
 >
-> **Hỗ trợ:** Arch Linux · EndeavourOS · CachyOS · (9 package managers, multi-distro)
+> **Supports:** Arch Linux · EndeavourOS · CachyOS · (9 package managers, multi-distro)
 
 <p align="center">
   <a href="https://github.com/laosifu/Hyprland-Control-Center/actions"><img src="https://github.com/laosifu/Hyprland-Control-Center/actions/workflows/test.yml/badge.svg" alt="CI"></a>

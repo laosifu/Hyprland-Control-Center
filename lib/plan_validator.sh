@@ -17,6 +17,11 @@ plan_validate_action() {
             [[ -n "$arg1" ]]
             ;;
 
+        INSTALL_FLATPAK)
+
+            [[ -n "$arg1" ]]
+            ;;
+
         INSTALL_AUR)
 
             [[ -n "$arg1" ]]

@@ -5,6 +5,7 @@
 #
 
 source "$PROJECT_ROOT/lib/planners/package_planner.sh"
+source "$PROJECT_ROOT/lib/planners/flatpak_planner.sh"
 source "$PROJECT_ROOT/lib/planners/aur_planner.sh"
 source "$PROJECT_ROOT/lib/planners/git_planner.sh"
 source "$PROJECT_ROOT/lib/planners/copy_planner.sh"

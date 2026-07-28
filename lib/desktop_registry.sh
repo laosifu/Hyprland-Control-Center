@@ -59,7 +59,7 @@ desktop_registry_load_package() {
     unset NAME ID VERSION AUTHOR DESCRIPTION SUPPORTED_DISTROS
     unset PACKAGE_ROOT CONFIG_ROOT ASSETS_ROOT REBOOT_REQUIRED
     unset PACKAGE_ROOT_DIR
-    unset PACMAN_PACKAGES AUR_PACKAGES GIT_REPOSITORIES COPY_ITEMS
+    unset PACMAN_PACKAGES AUR_PACKAGES FLATPAK_PACKAGES GIT_REPOSITORIES COPY_ITEMS
     unset PACKAGES PACKAGES__LEN AUR__LEN
     unset GIT_REPOSITORIES_0_URL GIT_REPOSITORIES_0_PATH GIT_REPOSITORIES_0_PATH_0
     unset GIT_REPOSITORIES__LEN
@@ -210,7 +210,7 @@ desktop_package_validate_and_load_external() {
 # External desktop registry (user-managed, $HOME based)
 #
 
-HCC_EXTERNAL_DESKTOP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/hcc/desktops"
+HCC_EXTERNAL_DESKTOP_DIR="${XDG_DATA_HOME:-${HCC_REAL_HOME:-$HOME}/.local/share}/hcc/desktops"
 
 desktop_external_root() {
     mkdir -p "$HCC_EXTERNAL_DESKTOP_DIR" 2>/dev/null || true
@@ -489,6 +489,7 @@ PACKAGE_ROOT="."
 REBOOT_REQUIRED=false
 PACMAN_PACKAGES="$pacman_pkgs"
 AUR_PACKAGES="$aur_pkgs"
+FLATPAK_PACKAGES=""
 GIT_REPOSITORIES="$git_items"
 COPY_ITEMS="$copy_items"
 EOF
@@ -555,6 +556,7 @@ desktop_external_show_package_conf_help() {
     echo "  REBOOT_REQUIRED=false"
     echo "  PACMAN_PACKAGES=\"pkg1 pkg2\""
     echo "  AUR_PACKAGES=\"pkg1 pkg2\""
+    echo "  FLATPAK_PACKAGES=\"org.mozilla.firefox org.keepassxc.KeePassXC\""
     echo "  GIT_REPOSITORIES=\"url|~/.config/name\""
     echo "  COPY_ITEMS=\"src|dest\""
     echo
@@ -570,6 +572,7 @@ desktop_external_show_package_conf_help() {
     echo "  DESCRIPTION=\"A beautiful Hyprland setup\""
     echo "  PACMAN_PACKAGES=\"hyprland kitty waybar\""
     echo "  AUR_PACKAGES=\"hyprpanel-git\""
+    echo "  FLATPAK_PACKAGES=\"org.mozilla.firefox\""
     echo "  COPY_ITEMS=\".config/hypr|~/.config/hypr"
     echo "  .config/kitty|~/.config/kitty\""
     echo
@@ -841,7 +844,7 @@ desktop_external_add() {
 # AI-powered package.conf generation (Google Gemini)
 #
 
-HCC_AI_CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/hcc/ai.conf"
+HCC_AI_CONFIG_FILE="${XDG_CONFIG_HOME:-${HCC_REAL_HOME:-$HOME}/.config}/hcc/ai.conf"
 
 desktop_ai_load_key() {
     HCC_AI_API_KEY="${HCC_AI_API_KEY:-}"
@@ -949,6 +952,7 @@ NAME=<human readable name>
 DESCRIPTION=<one line description>
 PACMAN_PACKAGES=<space separated arch packages, or empty>
 AUR_PACKAGES=<space separated aur packages, or empty>
+FLATPAK_PACKAGES=<space separated flatpak app IDs, or empty>
 GIT_REPOSITORIES=<leave empty>
 COPY_ITEMS=<path/in/repo|~/.config/dest on each line, use \n between multiple, or empty>
 
@@ -1021,6 +1025,7 @@ PACKAGE_ROOT="."
 REBOOT_REQUIRED=false
 PACMAN_PACKAGES="$f_pacman"
 AUR_PACKAGES="$f_aur"
+FLATPAK_PACKAGES=""
 GIT_REPOSITORIES=""
 COPY_ITEMS="$f_copy"
 EOF
