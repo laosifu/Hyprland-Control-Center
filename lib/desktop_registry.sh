@@ -1061,7 +1061,7 @@ desktop_registry_list() {
 # Community registry discovery
 #
 
-HCC_COMMUNITY_REGISTRY_URL="${HCC_COMMUNITY_REGISTRY_URL:-https://raw.githubusercontent.com/hyprland-control-center/community-registry/main/registry.txt}"
+HCC_COMMUNITY_REGISTRY_URL="${HCC_COMMUNITY_REGISTRY_URL:-https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/docs/community-registry/registry.txt}"
 
 desktop_registry_community_fetch() {
     local keyword="${1:-}"
