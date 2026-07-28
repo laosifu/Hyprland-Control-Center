@@ -1,0 +1,8 @@
+# HCC Community Registry
+# Format: Name|git-url|Short description
+#
+# To add your desktop, fork the repo and submit a PR.
+# See CONTRIBUTING.md for details.
+
+mailong2401|https://github.com/mailong2401/cartoon-shell|Hyprland + Quickshell cartoon-shell + Kitty + Fish
+end-4|https://github.com/end-4/dots-hyprland|illogical-impulse: Quickshell widgets, AI, Material Design

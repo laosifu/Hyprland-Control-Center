@@ -1,6 +1,7 @@
 # Hyprland Control Center (HCC) - Project State
 
 *Last updated: 2026-07-25 (v0.8.0)*
+*See docs/RELEASE.md for deployment instructions.*
 
 ---
 
