@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) - Project State
 
-*Last updated: 2026-07-25 (v0.6.1)*
+*Last updated: 2026-07-25 (v0.7.0)*
 
 ---
 
@@ -154,6 +154,12 @@ Core layers:
 | AI Integration (Gemini) | ✅ Complete (v0.6.0) |
 | AI CLI (`hcc ai`) | ✅ Complete (v0.6.1) |
 | Community Registry Search | ✅ Complete (v0.6.1) |
+| Flatpak Support | ✅ Complete (v0.7.0) |
+| Display Manager Abstraction | ✅ Complete (v0.7.0) |
+| `hcc desktop update` | ✅ Complete (v0.7.0) |
+| `hcc desktop init` (wizard) | ✅ Complete (v0.7.0) |
+| Batch Install (`pm_install_all`) | ✅ Complete (v0.7.0) |
+| English Documentation | ✅ Partial (README.en.md, ARCHITECTURE.en.md) |
 
 ---
 
@@ -369,7 +375,7 @@ All 36 tests pass.
 | Dependency Service | Needs redesign | Performs installation rather than dependency management |
 | Session isolation code | Removed | Was causing login-screen freezes |
 | Distro support | Arch-only tested | Package abstraction layer supports 8 PMs but untested |
-| English documentation | Partial | README is Vietnamese, ARCHITECTURE.md is Vietnamese |
+| English documentation | Partial | README.en.md exists, ARCHITECTURE.md is bilingual |
 
 ---
 
@@ -416,7 +422,74 @@ All 36 tests pass.
 
 ---
 
-# 17. Bugs Fixed in Config Parser
+# 17. v0.7.0 — Flatpak, Batch Install, Desktop Update, DM Abstraction, Init Wizard (2026-07-25)
+
+> Commit: `5cf1e2e`
+
+### Flatpak support (`lib/package/`)
+
+| File | Change |
+|---|---|
+| `detect.sh` | Added flatpak detection (lowest priority PM + `HCC_HAS_FLATPAK` flag) |
+| `install.sh` | Added `__pm_install_batch flatpak` case |
+| `remove.sh` | Added flatpak remove case |
+| `query.sh` | Added `pm_installed` + `pm_available` for flatpak |
+| `map.sh` | 14 flatpak name mappings (kitty, firefox, mpv, etc.) |
+
+### Batch install (`lib/package/install.sh`)
+
+- `pm_install` now collects all packages, maps names, checks installed status, then issues **one `sudo` command** per PM (except nix which installs one-by-one)
+- `pm_install_all` alias for clarity
+- Drastically reduces `sudo` prompts during install
+
+### Display Manager abstraction (`lib/display_manager/`)
+
+| Function | Description |
+|---|---|
+| `dm_detect()` | Auto-detect SDDM/GDM/LightDM/greetd via systemd service + binary check |
+| `dm_install_entry()` | Create `.desktop` entry in correct DM sessions directory |
+| `dm_remove_entry()` | Remove `.desktop` entry |
+
+Updated `lib/detect.sh` `detect_display_manager()` to delegate to `dm_detect()`.
+Updated `lib/desktop_pipeline.sh` to use `dm_install_entry()` instead of hardcoded SDDM path.
+
+### `hcc desktop update <id>` (`modules/desktop_update.sh`)
+
+- Loads profile registry to get source info
+- If source is git URL: `git pull` in external dir, re-load package
+- If source is local: re-load from bundled registry
+- Re-generates plan, checks conflicts, confirms, executes
+- Re-registers profile with updated version
+
+### `hcc desktop init [dir]` (`modules/desktop_init.sh`)
+
+Interactive wizard that:
+- Asks for name, ID, version, author, description, license
+- Scans `~/.config/` to auto-detect packages (via `desktop_external_detect_from_home_config`)
+- Scans config dirs for `COPY_ITEMS` entries
+- Detects git repos in config dirs
+- Generates `package.toml`, `package.conf` (legacy), `hcc.manifest`, `hooks/post-install.sh`
+- Optionally copies current config files into `payload/`
+
+### `install.sh` improvements
+
+- Non-Arch OS now shows **warning** instead of hard fail (distro-agnostic)
+- AUR helper detection expanded: `yay`, `paru`, `trizen`, `pamac`
+- Session launcher installation uses proper `if/else` (not `&&/||`)
+
+### English documentation
+
+- `README.en.md` — full English translation of README
+- `docs/ARCHITECTURE.md` — rewritten bilingual (Vietnamese + English)
+
+### Verification
+
+- All 36 tests pass
+- Version bump 0.6.1 → 0.7.0
+
+---
+
+# 18. Bugs Fixed in Config Parser
 
 | # | Bug | Fix |
 |---|---|---|
@@ -465,22 +538,22 @@ All 36 tests pass.
 
 ## Short-term
 
-1. **TOML → Legacy conversion test** — verify `desktop_registry_load_package` populates all vars correctly (done, verified)
-2. **Update `desktop_package_is_supported()`** — make distro-flexible (not just Arch-based)
-3. **Test on non-Arch distro** — Fedora/Ubuntu VM to validate package abstraction layer
+1. **Test Gemini API end-to-end** — install from real URL without package.conf
+2. **Community registry** — create `hyprland-control-center/community-registry` GitHub repo + wire `hcc desktop search`
+3. **Test on non-Arch distro** — Fedora/Ubuntu VM to validate package abstraction layer + flatpak
 
 ## Medium-term
 
-4. Community registry setup (GitHub repo: `hyprland-control-center/community-registry`)
-5. Test Gemini API end-to-end with real URL install
-6. AUR helper abstraction improvements
-7. Flatpak support
+4. **`hcc get <profile>`** — super command: detect OS → install HCC → install profile → done
+5. **AUR package** — publish `hcc-bin` and `hcc-git` on AUR
+6. **CI pipeline** — GitHub Actions (test on Arch, Fedora, Ubuntu)
+7. **Resolve tech debt** — Action Engine, Deployment Service, Dependency Service
 
 ## v1.0.0
 
 8. Remove bundled packages from HCC repo
-9. English documentation
-10. CI pipeline (GitHub Actions)
+9. Full English documentation
+10. ShellCheck CI
 
 ---
 

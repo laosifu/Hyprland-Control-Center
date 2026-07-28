@@ -45,6 +45,19 @@ pm_map_name() {
         dnf:wl-clipboard)    echo "wl-clipboard" ;;
         dnf:fd)              echo "fd-find" ;;
         dnf:python)          echo "python3" ;;
+        flatpak:kitty)       echo "org.keepassxc.KeePassXC" ;;
+        flatpak:firefox)     echo "org.mozilla.firefox" ;;
+        flatpak:mpv)         echo "io.mpv.Mpv" ;;
+        flatpak:thunar)      echo "org.xfce.thunar" ;;
+        flatpak:btop)        echo "com.topgrade.Btop" ;;
+        flatpak:obsidian)    echo "md.obsidian.Obsidian" ;;
+        flatpak:spotify)     echo "com.spotify.Client" ;;
+        flatpak:discord)     echo "com.discordapp.Discord" ;;
+        flatpak:slack)       echo "com.slack.Slack" ;;
+        flatpak:gimp)        echo "org.gimp.GIMP" ;;
+        flatpak:inkscape)    echo "org.inkscape.Inkscape" ;;
+        flatpak:vlc)         echo "org.videolan.VLC" ;;
+        flatpak:libreoffice) echo "org.libreoffice.LibreOffice" ;;
         *)
             echo "$pkg"
             ;;

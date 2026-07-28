@@ -29,6 +29,9 @@ pm_installed() {
         apk)
             apk info "$mapped" &>/dev/null 2>&1
             ;;
+        flatpak)
+            flatpak info "$mapped" &>/dev/null 2>&1
+            ;;
         *)
             return 1
             ;;
@@ -55,6 +58,9 @@ pm_available() {
             ;;
         nix)
             nix search "nixpkgs#$mapped" &>/dev/null 2>&1
+            ;;
+        flatpak)
+            flatpak search "$mapped" &>/dev/null 2>&1
             ;;
         *)
             return 1

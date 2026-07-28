@@ -38,6 +38,9 @@ pm_remove() {
             apk)
                 operation_run sudo apk del "$mapped"
                 ;;
+            flatpak)
+                operation_run flatpak uninstall -y "$mapped"
+                ;;
         esac
     done
 }

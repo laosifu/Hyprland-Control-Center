@@ -40,6 +40,9 @@ __pm_install_batch() {
             privilege_require_root_unless_dry_run || return 1
             operation_run sudo apk add "$@"
             ;;
+        flatpak)
+            operation_run flatpak install -y flathub "$@"
+            ;;
     esac
 }
 

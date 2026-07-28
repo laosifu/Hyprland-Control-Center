@@ -52,9 +52,19 @@ desktop_dispatch() {
 
             ;;
 
+        init)
+
+            shift
+
+            log_info "Running desktop profile creator"
+
+            run_desktop_init "$@"
+
+            ;;
+
         *)
 
-            print_error "Usage: hcc desktop <list|search|install|uninstall|update> [name]"
+            print_error "Usage: hcc desktop <list|search|install|uninstall|update|init> [name]"
 
             ;;
 

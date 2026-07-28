@@ -27,7 +27,17 @@ pm_detect() {
         HCC_PM="portage"
     elif command -v apk &>/dev/null; then
         HCC_PM="apk"
+    elif command -v flatpak &>/dev/null; then
+        HCC_PM="flatpak"
+    fi
+
+    if command -v flatpak &>/dev/null; then
+        HCC_HAS_FLATPAK=true
     fi
 
     [[ -n "$HCC_PM" ]]
+}
+
+pm_has_flatpak() {
+    [[ "${HCC_HAS_FLATPAK:-false}" == true ]]
 }
