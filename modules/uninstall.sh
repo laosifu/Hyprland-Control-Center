@@ -112,7 +112,9 @@ run_uninstall_show_menu() {
 
     local -a selected
     if [[ "$raw" == "0" ]]; then
-        selected=("${order[@]}")
+        for entry in "${order[@]}"; do
+            selected+=("${entry%%|*}")
+        done
     else
         local tokens
         tokens=($raw)
@@ -137,7 +139,7 @@ run_uninstall_show_menu() {
     echo
     print_info "Cac thanh phan se bi xoa:"
     for k in "${selected[@]}"; do
-        echo "  - ${descriptions[$k]}"
+        echo "  - ${descriptions[$k]:-Xoa $k}"
     done
     echo
 
