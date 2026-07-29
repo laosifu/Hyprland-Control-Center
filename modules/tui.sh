@@ -1,4 +1,8 @@
 tui_dispatch() {
+    LANG_MODE="vi"
+    case "${HCC_LANG:-${LANG:-}}" in
+        en*|EN*) LANG_MODE="en" ;;
+    esac
     if has_command fzf; then
         tui_menu_fzf
     elif has_command whiptail; then
@@ -12,27 +16,35 @@ tui_dispatch() {
 
 tui_header() {
     clear 2>/dev/null || true
-    echo "╔══════════════════════════════════════════╗"
-    echo "║     Hyprland Control Center v$VERSION       ║"
-    echo "║     Giao dien tuong tac - Interactive     ║"
-    echo "╚══════════════════════════════════════════╝"
+    if [[ "$LANG_MODE" == "en" ]]; then
+        echo "╔══════════════════════════════════════════╗"
+        echo "║     Hyprland Control Center v$VERSION       ║"
+        echo "║     Interactive TUI                       ║"
+        echo "╚══════════════════════════════════════════╝"
+    else
+        echo "╔══════════════════════════════════════════╗"
+        echo "║     Hyprland Control Center v$VERSION       ║"
+        echo "║     Giao dien tuong tac - Interactive     ║"
+        echo "╚══════════════════════════════════════════╝"
+    fi
     echo
 }
 
 tui_menu_fzf() {
     local choice
     while true; do
-        choice=$(printf "%s\n" \
-            "🖥️  Cai dat Desktop (Install Desktop)" \
-            "📋  Quan ly Profile (Profile Management)" \
-            "🔧  Kiem tra he thong (Doctor & System)" \
-            "💾  Backup & Restore" \
-            "🎨  Theme & Plugin" \
-            "🌐  Tim kiem cong dong (Community Search)" \
-            "🤖  AI Integration" \
-            "📦  Tu cap nhat (Self-Update)" \
-            "📖  Tro giup (Help)" \
-            "❌  Thoat (Exit)" | fzf --prompt="HCC > " \
+    choice=$(printf "%s\n" \
+        "🖥️  Cai dat Desktop (Install Desktop)" \
+        "📋  Quan ly Profile (Profile Management)" \
+        "🔧  Kiem tra he thong (Doctor & System)" \
+        "💾  Backup & Restore" \
+        "🎨  Theme & Plugin" \
+        "🌐  Tim kiem cong dong (Community Search)" \
+        "🤖  AI Integration" \
+        "📦  Tu cap nhat (Self-Update)" \
+        "🗑️  Go bo HCC (Uninstall HCC)" \
+        "📖  Tro giup (Help)" \
+        "❌  Thoat (Exit)" | fzf --prompt="HCC > " \
             --header="Chon chuc nang / Select a function" \
             --height=60% \
             --no-info)
@@ -45,18 +57,19 @@ tui_menu_fzf() {
 tui_menu_whiptail() {
     local choice
     while true; do
-        choice=$(whiptail --title "Hyprland Control Center v$VERSION" \
-            --menu "Chon chuc nang / Select a function:" \
-            20 65 9 \
-            "1" "🖥️  Cai dat Desktop (Install Desktop)" \
-            "2" "📋  Quan ly Profile (Profile Management)" \
-            "3" "🔧  Kiem tra he thong (Doctor & System)" \
-            "4" "💾  Backup & Restore" \
-            "5" "🎨  Theme & Plugin" \
-            "6" "🌐  Tim kiem cong dong (Community Search)" \
-            "7" "🤖  AI Integration" \
-            "8" "📦  Tu cap nhat (Self-Update)" \
-            "9" "📖  Tro giup (Help)" \
+    choice=$(whiptail --title "Hyprland Control Center v$VERSION" \
+        --menu "Chon chuc nang / Select a function:" \
+        20 65 10 \
+        "1" "🖥️  Cai dat Desktop (Install Desktop)" \
+        "2" "📋  Quan ly Profile (Profile Management)" \
+        "3" "🔧  Kiem tra he thong (Doctor & System)" \
+        "4" "💾  Backup & Restore" \
+        "5" "🎨  Theme & Plugin" \
+        "6" "🌐  Tim kiem cong dong (Community Search)" \
+        "7" "🤖  AI Integration" \
+        "8" "📦  Tu cap nhat (Self-Update)" \
+        "9" "🗑️  Go bo HCC (Uninstall)" \
+        "10" "📖  Tro giup (Help)" \
             3>&1 1>&2 2>&3)
 
         [[ -z "$choice" ]] && break
@@ -69,7 +82,14 @@ tui_menu_whiptail() {
             6) tui_menu_search ;;
             7) tui_menu_ai ;;
             8) self_update_dispatch ;;
-            9) show_help | less ;;
+            9)
+                if run_uninstall --dry-run; then
+                    local ans
+                    read -rp "Tien hanh xoa? (go 'YES' de xac nhan): " ans
+                    [[ "$ans" == "YES" ]] && run_uninstall
+                fi
+                read -rp "Enter de tiep tuc..."
+                ;;
         esac
     done
 }
@@ -79,7 +99,7 @@ tui_menu_dialog() {
     while true; do
         choice=$(dialog --stdout --title "Hyprland Control Center v$VERSION" \
             --menu "Chon chuc nang / Select a function:" \
-            20 65 9 \
+            20 65 10 \
             1 "🖥️  Cai dat Desktop (Install Desktop)" \
             2 "📋  Quan ly Profile (Profile Management)" \
             3 "🔧  Kiem tra he thong (Doctor & System)" \
@@ -88,7 +108,8 @@ tui_menu_dialog() {
             6 "🌐  Tim kiem cong dong (Community Search)" \
             7 "🤖  AI Integration" \
             8 "📦  Tu cap nhat (Self-Update)" \
-            9 "📖  Tro giup (Help)")
+            9 "🗑️  Go bo HCC (Uninstall)" \
+            10 "📖  Tro giup (Help)")
 
         [[ -z "$choice" ]] && break
         case "$choice" in
@@ -100,7 +121,8 @@ tui_menu_dialog() {
             6) tui_menu_search ;;
             7) tui_menu_ai ;;
             8) self_update_dispatch ;;
-            9) show_help | less ;;
+            9) run_uninstall && read -rp "Enter de tiep tuc..." ;;
+            10) show_help | less ;;
         esac
     done
 }
@@ -116,10 +138,11 @@ tui_menu_select() {
         echo "6)  🌐  Tim kiem cong dong (Community Search)"
         echo "7)  🤖  AI Integration"
         echo "8)  📦  Tu cap nhat (Self-Update)"
-        echo "9)  📖  Tro giup (Help)"
+        echo "9)  🗑️  Go bo HCC (Uninstall)"
+        echo "10) 📖  Tro giup (Help)"
         echo "0)  ❌  Thoat (Exit)"
         echo
-        read -rp "Chon [0-9]: " choice
+        read -rp "Chon [0-10]: " choice
         case "$choice" in
             1) tui_menu_desktop ; read -rp "Enter de tiep tuc..." ;;
             2) tui_menu_profile ; read -rp "Enter de tiep tuc..." ;;
@@ -129,7 +152,8 @@ tui_menu_select() {
             6) tui_menu_search ; read -rp "Enter de tiep tuc..." ;;
             7) tui_menu_ai ; read -rp "Enter de tiep tuc..." ;;
             8) self_update_dispatch ; read -rp "Enter de tiep tuc..." ;;
-            9) show_help | less ;;
+            9) run_uninstall ; read -rp "Enter de tiep tuc..." ;;
+            10) show_help | less ;;
             0) break ;;
         esac
     done
@@ -146,7 +170,8 @@ tui_handle_choice() {
         🌐|6) tui_menu_search ;;
         🤖|7) tui_menu_ai ;;
         📦|8) self_update_dispatch ; read -rp "Enter de tiep tuc..." ;;
-        📖|9) show_help | less ;;
+        🗑️|9) run_uninstall ; read -rp "Enter de tiep tuc..." ;;
+        📖|10|9) show_help | less ;;
     esac
 }
 

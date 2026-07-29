@@ -102,6 +102,12 @@ dispatch_command() {
 
             ;;
 
+        uninstall)
+
+            run_uninstall "$@"
+
+            ;;
+
         tui|interactive)
 
             tui_dispatch "$@"
