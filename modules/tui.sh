@@ -522,9 +522,16 @@ tui_menu_ai() {
             "← Quay lai (Back)" | fzf --prompt="AI > " --height=30% --no-info)
         [[ -z "$choice" || "$choice" == *"Back"* ]] && return
         case "$choice" in
-            *Setup*|"*Cau hinh*") ai_setup_dispatch ; read -rp "Enter de tiep tuc..." ;;
-            *Status*|"*Kiem tra*") ai_status_dispatch ; read -rp "Enter de tiep tuc..." ;;
-            *Remove*|*Xoa*) ai_remove_key_dispatch ; read -rp "Enter de tiep tuc..." ;;
+            *Setup*|"*Cau hinh*") desktop_ai_setup ; read -rp "Enter de tiep tuc..." ;;
+            *Status*|"*Kiem tra*")
+                if desktop_ai_load_key; then
+                    print_success "AI API key đã được cấu hình."
+                else
+                    print_warning "AI API key chưa được cấu hình."
+                fi
+                read -rp "Enter de tiep tuc..."
+                ;;
+            *Remove*|*Xoa*) desktop_ai_remove_key ; read -rp "Enter de tiep tuc..." ;;
         esac
     else
         local choice
@@ -535,9 +542,15 @@ tui_menu_ai() {
             "0" "← Back" 3>&1 1>&2 2>&3)
         [[ -z "$choice" || "$choice" == "0" ]] && return
         case "$choice" in
-            1) ai_setup_dispatch ;;
-            2) ai_status_dispatch ;;
-            3) ai_remove_key_dispatch ;;
+            1) desktop_ai_setup ;;
+            2)
+                if desktop_ai_load_key; then
+                    whiptail --msgbox "AI API key đã được cấu hình." 8 30
+                else
+                    whiptail --msgbox "AI API key chưa được cấu hình." 8 30
+                fi
+                ;;
+            3) desktop_ai_remove_key ;;
         esac
         whiptail --msgbox "Xong!" 8 30
     fi
