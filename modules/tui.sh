@@ -82,14 +82,7 @@ tui_menu_whiptail() {
             6) tui_menu_search ;;
             7) tui_menu_ai ;;
             8) self_update_dispatch ;;
-            9)
-                if run_uninstall --dry-run; then
-                    local ans
-                    read -rp "Tien hanh xoa? (go 'YES' de xac nhan): " ans
-                    [[ "$ans" == "YES" ]] && run_uninstall
-                fi
-                read -rp "Enter de tiep tuc..."
-                ;;
+            9) run_uninstall ; read -rp "Enter de tiep tuc..." ;;
         esac
     done
 }
