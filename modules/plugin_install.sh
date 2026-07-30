@@ -51,7 +51,7 @@ run_plugin_install() {
 
     ui_header "Plugin Installer"
 
-    local plugin="$1"
+    local plugin="${1:-}"
 
     if [[ -z "$plugin" ]]; then
 
@@ -104,7 +104,7 @@ run_plugin_install() {
 
 run_plugin_uninstall() {
 
-    local plugin="$1"
+    local plugin="${1:-}"
     local plugin_dir
     local script
 

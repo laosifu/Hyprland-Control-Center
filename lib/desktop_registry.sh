@@ -1121,7 +1121,7 @@ desktop_registry_community_fetch() {
 }
 
 desktop_registry_community_search() {
-    local keyword="$1"
+    local keyword="${1:-}"
 
     if [[ -z "$keyword" ]]; then
         print_error "Nhap tu khoa tim kiem."

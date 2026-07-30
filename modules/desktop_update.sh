@@ -1,5 +1,5 @@
 run_desktop_update() {
-    local id="$1"
+    local id="${1:-}"
 
     if [[ -z "$id" ]]; then
         print_error "Usage: hcc desktop update <id>"

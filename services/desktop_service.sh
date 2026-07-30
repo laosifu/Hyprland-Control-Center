@@ -77,7 +77,7 @@ desktop_execute_plan() {
 
 desktop_service_install() {
 
-    local desktop="$1"
+    local desktop="${1:-}"
     local external_dir=""
     local is_url=false
 

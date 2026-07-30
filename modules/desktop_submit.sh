@@ -1,6 +1,6 @@
 run_desktop_submit() {
     local id="${1:-}"
-    local profile_file
+    local profile_file=""
 
     if [[ -n "$id" ]]; then
         profile_file="$(desktop_external_package_file "$id" 2>/dev/null)"

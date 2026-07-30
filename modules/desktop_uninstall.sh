@@ -1,5 +1,5 @@
 run_desktop_uninstall() {
-    local id="$1"
+    local id="${1:-}"
     local plan_file
     local profile_dir
     local has_configs=false

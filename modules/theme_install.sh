@@ -4,7 +4,7 @@ run_theme_install() {
 
     ui_header "Theme Installer"
 
-    local name="$1"
+    local name="${1:-}"
 
     if [[ -z "$name" ]]; then
 
@@ -71,7 +71,7 @@ run_theme_install() {
 
 run_theme_uninstall() {
 
-    local name="$1"
+    local name="${1:-}"
     local theme
 
     [[ -n "$name" ]] || {
