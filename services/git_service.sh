@@ -50,6 +50,13 @@ git_service_clone_or_update() {
 
         git_service_update "$destination"
 
+    elif [[ -d "$destination" ]]; then
+
+        rm -rf "$destination"
+        git_service_clone \
+            "$repository" \
+            "$destination"
+
     else
 
         git_service_clone \
