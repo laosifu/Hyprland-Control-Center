@@ -349,8 +349,8 @@ tui_menu_profile() {
                 "← Quay lai (Back)" | fzf --prompt="Profile > " --height=30% --no-info)
             [[ -z "$choice" || "$choice" == *"Back"* ]] && break
             case "$choice" in
-                *List*|*danh*) profile_list_dispatch ;;
-                *Status*|*Trang*) profile_status_dispatch ;;
+                *List*|*danh*) run_profiles ;;
+                *Status*|*Trang*) run_profile_status ;;
                 *Switch*|*Chuyen*) tui_profile_switch ;;
             esac
         else
@@ -362,8 +362,8 @@ tui_menu_profile() {
                 "0" "← Back" 3>&1 1>&2 2>&3)
             [[ -z "$choice" || "$choice" == "0" ]] && break
             case "$choice" in
-                1) profile_list_dispatch ;;
-                2) profile_status_dispatch ;;
+                1) run_profiles ;;
+                2) run_profile_status ;;
                 3) tui_profile_switch ;;
             esac
         fi
@@ -377,7 +377,7 @@ tui_profile_switch() {
     [[ -z "$profiles" ]] && { print_warning "Chua co profile nao"; return; }
     id=$(echo "$profiles" | fzf --prompt="Chuyen sang > " --height=30% --no-info)
     [[ -z "$id" ]] && return
-    profile_switch_dispatch "$id"
+    profile_dispatch switch "$id"
 }
 
 # --- System submenu ---

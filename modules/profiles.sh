@@ -41,3 +41,47 @@ run_profile_status() {
     print_info "Active profile: $PROFILE_NAME ($PROFILE_VERSION)"
 
 }
+
+run_profile_switch() {
+    local id="${1:-}"
+    local active
+
+    if [[ -z "$id" ]]; then
+        print_error "Usage: hcc profile switch <id>"
+        print_info "Use: hcc profile list (xem danh sach da cai)"
+        return 1
+    fi
+
+    if ! profile_registry_exists "$id"; then
+        print_error "Profile not found: $id"
+        return 1
+    fi
+
+    active="$(profile_registry_active)"
+    if [[ "$active" == "$id" ]]; then
+        print_info "Profile '$id' is already active."
+        return 0
+    fi
+
+    profile_registry_load "$active" 2>/dev/null || true
+
+    print_header "Switch Profile"
+    ui_field "From" "${PROFILE_NAME:-$active} (${PROFILE_VERSION:-})"
+    ui_field "To" "$id"
+    echo
+
+    local answer
+    read -rp "Switch to profile '$id'? [y/N]: " answer
+    case "$answer" in
+        [Yy]|[Yy][Ee][Ss])
+            profile_registry_activate "$id"
+            print_success "Switched to profile: $id"
+            echo
+            print_info "Dang xuat de ap dung thay doi."
+            print_info "Dang nhap lai de thay desktop moi."
+            ;;
+        *)
+            print_warning "Switch cancelled."
+            ;;
+    esac
+}
