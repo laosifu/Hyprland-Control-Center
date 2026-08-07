@@ -106,7 +106,7 @@ run_uninstall_show_menu() {
     echo
 
     local raw
-    read -rp "Chon [1-$(($idx-1)), cach nhau boi空格 hoac 0=all]: " raw
+    read -rp "Chon [1-$(($idx-1)), cach nhau boi dau cach, hoac 0=all]: " raw
 
     [[ -z "$raw" ]] && return 1
 
@@ -144,8 +144,15 @@ run_uninstall_show_menu() {
     echo
 
     local confirm
-    read -rp "Xac nhan xoa? (go 'YES' de xoa): " confirm
-    [[ "$confirm" != "YES" ]] && { print_info "Da huy."; return 1; }
+    read -rp "Xac nhan xoa? (go 'YES' hoac 'y' de xoa): " confirm
+    if [[ "$confirm" == "YES" ]]; then
+        :
+    elif [[ "$confirm" =~ ^[yY]$ ]]; then
+        :
+    else
+        print_info "Da huy."
+        return 1
+    fi
 
     for k in "${selected[@]}"; do
         run_uninstall_item "$k"
