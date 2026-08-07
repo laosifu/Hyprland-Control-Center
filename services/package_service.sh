@@ -8,7 +8,7 @@ package_service_is_installed() {
 
 package_service_install() {
 
-    local package="$1"
+    local package="${1:-}"
 
     if package_service_is_installed "$package"
     then
@@ -23,6 +23,10 @@ package_service_install() {
     || return 1
 
     package_operation_install \
-        "$package"
+        "$package" \
+    || return 1
+
+    transaction_register \
+        "package_operation_remove '$package'"
 
 }

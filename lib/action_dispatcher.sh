@@ -17,7 +17,9 @@ dispatch_action() {
         INSTALL_FLATPAK)
 
             operation_run flatpak install -y flathub \
-                "$PLAN_RECORD_ARG1"
+                "$PLAN_RECORD_ARG1" \
+            && transaction_register \
+                "operation_run flatpak uninstall -y '$PLAN_RECORD_ARG1'"
             ;;
 
         INSTALL_AUR)

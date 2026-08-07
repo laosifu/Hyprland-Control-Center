@@ -8,7 +8,7 @@ aur_service_is_installed() {
 
 aur_service_install() {
 
-    local package="$1"
+    local package="${1:-}"
 
     if aur_service_is_installed "$package"
     then
@@ -20,6 +20,10 @@ aur_service_install() {
     fi
 
     aur_operation_install_package \
-        "$package"
+        "$package" \
+    || return 1
+
+    transaction_register \
+        "package_operation_remove '$package'"
 
 }
