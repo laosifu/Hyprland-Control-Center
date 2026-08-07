@@ -1,0 +1,10 @@
+# ShellCheck configuration for HCC
+
+# Source files are loaded via bootstrap
+external-sources=true
+
+# Allow following sourced files
+source-path=SCRIPTDIR
+
+# Disable style-level warnings
+disable=SC1090,SC1091,SC2034,SC2154,SC2086,SC2046,SC2181,SC2128,SC2207,SC2206,SC2002

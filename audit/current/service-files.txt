@@ -1,0 +1,8 @@
+services/bootstrap.sh
+services/dependency_service.sh
+services/deployment_service.sh
+services/desktop_service.sh
+services/filesystem_service.sh
+services/git_service.sh
+services/hook_service.sh
+services/package_service.sh

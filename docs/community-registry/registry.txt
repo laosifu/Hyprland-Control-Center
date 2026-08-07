@@ -1,0 +1,16 @@
+# HCC Community Registry
+# Format: Name|git-url|Short description
+#
+# To add your desktop, fork the repo and submit a PR.
+# See CONTRIBUTING.md for details.
+
+mailong2401|https://github.com/mailong2401/cartoon-shell|Hyprland + Quickshell cartoon-shell + Kitty + Fish
+end-4|https://github.com/end-4/dots-hyprland|illogical-impulse: Quickshell widgets, AI, Material Design
+prasanthrangan|https://github.com/prasanthrangan/hyprdots|Hyprdots: Extensive Hyprland rice with themes, widgets, and auto-config
+khamer|https://github.com/khamer/krisp|Krisp: Minimal Hyprland setup with Eww widgets and custom keybinds
+solDoesTech|https://github.com/solDoesTech/HyprV4|HyprV4: Gaming-focused Hyprland rice with Nvidia support
+mylinuxforwork|https://github.com/mylinuxforwork/dotfiles|ML4W Hyprland: Beginner-friendly with app launcher and widgets
+JaKooLit|https://github.com/JaKooLit/Hyprland-Dots|Feature-rich Hyprland rice with Waybar, Rofi, and multi-distro support
+HyDE|https://github.com/HyDE-Project/HyDE|HyDE: Minimal, clean Hyprland desktop with extensive theming
+R7rainz|https://github.com/R7rainz/dotfiles|Rainz Arch Hyprland rice with Noctalia Shell, Ghostty, and Fish
+lukaszkowalik2|https://github.com/lukaszkowalik2/dotfiles|Rosé Pine themed Hyprland with Waybar, Wofi, and Pyprland

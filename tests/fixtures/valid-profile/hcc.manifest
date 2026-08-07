@@ -1,0 +1,7 @@
+HCC_MANIFEST_VERSION=1
+ID=sample-profile
+NAME=Sample Profile
+VERSION=1.0.0
+TYPE=desktop-profile
+AUTHOR=HCC Test
+DESCRIPTION=Safe manifest fixture
