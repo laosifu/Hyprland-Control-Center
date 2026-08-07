@@ -276,9 +276,13 @@ tui_install_url() {
     run_desktop_install "$url"
 }
 
+tui_profile_ids() {
+    profile_registry_list | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null
+}
+
 tui_select_and_uninstall() {
     local profiles
-    profiles=$(hcc profile list 2>/dev/null | grep -oP '^\s*\S+' | head -5 || true)
+    profiles=$(tui_profile_ids)
     if [[ -z "$profiles" ]]; then
         print_warning "Chua co profile nao duoc cai"
         return
@@ -292,7 +296,7 @@ tui_select_and_uninstall() {
 
 tui_select_and_update() {
     local profiles
-    profiles=$(hcc profile list 2>/dev/null | grep -oP '^\s*\S+' | head -5 || true)
+    profiles=$(tui_profile_ids)
     if [[ -z "$profiles" ]]; then
         print_warning "Chua co profile nao duoc cai"
         return
@@ -311,7 +315,7 @@ tui_init_wizard() {
 
 tui_select_and_export() {
     local profiles
-    profiles=$(hcc profile list 2>/dev/null | grep -oP '^\s*\S+' | head -5 || true)
+    profiles=$(tui_profile_ids)
     if [[ -z "$profiles" ]]; then
         print_warning "Chua co profile nao duoc cai"
         return
@@ -325,7 +329,7 @@ tui_select_and_export() {
 
 tui_select_and_submit() {
     local profiles
-    profiles=$(hcc profile list 2>/dev/null | grep -oP '^\s*\S+' | head -5 || true)
+    profiles=$(tui_profile_ids)
     if [[ -z "$profiles" ]]; then
         print_warning "Chua co profile nao duoc cai"
         return
@@ -377,10 +381,10 @@ tui_menu_profile() {
 }
 
 tui_profile_switch() {
-    local profiles id
-    profiles=$(hcc profile list 2>/dev/null | grep -oP '^\s*\S+' | head -5 || true)
-    [[ -z "$profiles" ]] && { print_warning "Chua co profile nao"; return; }
-    id=$(echo "$profiles" | fzf --prompt="Chuyen sang > " --height=30% --no-info)
+    local ids id
+    ids=$(tui_profile_ids)
+    [[ -z "$ids" ]] && { print_warning "Chua co profile nao de chuyen doi."; return; }
+    id=$(echo "$ids" | fzf --prompt="Chuyen sang > " --height=30% --no-info)
     [[ -z "$id" ]] && return
     profile_dispatch switch "$id"
 }
