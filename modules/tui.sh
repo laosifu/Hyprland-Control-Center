@@ -50,6 +50,7 @@ tui_menu_fzf() {
             --no-info)
 
         [[ -z "$choice" ]] && break
+        [[ "$choice" == *"Thoat"* || "$choice" == *"Exit"* ]] && break
         tui_handle_choice "${choice%% *}"
     done
 }
@@ -59,7 +60,7 @@ tui_menu_whiptail() {
     while true; do
     choice=$(whiptail --title "Hyprland Control Center v$VERSION" \
         --menu "Chon chuc nang / Select a function:" \
-        20 65 10 \
+        20 65 11 \
         "1" "🖥️  Cai dat Desktop (Install Desktop)" \
         "2" "📋  Quan ly Profile (Profile Management)" \
         "3" "🔧  Kiem tra he thong (Doctor & System)" \
@@ -70,9 +71,10 @@ tui_menu_whiptail() {
         "8" "📦  Tu cap nhat (Self-Update)" \
         "9" "🗑️  Go bo HCC (Uninstall)" \
         "10" "📖  Tro giup (Help)" \
+        "11" "❌  Thoat (Exit)" \
             3>&1 1>&2 2>&3)
 
-        [[ -z "$choice" ]] && break
+        [[ -z "$choice" || "$choice" == "11" ]] && break
         case "$choice" in
             1) tui_menu_desktop ;;
             2) tui_menu_profile ;;
@@ -83,6 +85,7 @@ tui_menu_whiptail() {
             7) tui_menu_ai ;;
             8) self_update_dispatch ;;
             9) run_uninstall ; read -rp "Enter de tiep tuc..." ;;
+            10) show_help | less ;;
         esac
     done
 }
@@ -92,7 +95,7 @@ tui_menu_dialog() {
     while true; do
         choice=$(dialog --stdout --title "Hyprland Control Center v$VERSION" \
             --menu "Chon chuc nang / Select a function:" \
-            20 65 10 \
+            20 65 11 \
             1 "🖥️  Cai dat Desktop (Install Desktop)" \
             2 "📋  Quan ly Profile (Profile Management)" \
             3 "🔧  Kiem tra he thong (Doctor & System)" \
@@ -102,9 +105,10 @@ tui_menu_dialog() {
             7 "🤖  AI Integration" \
             8 "📦  Tu cap nhat (Self-Update)" \
             9 "🗑️  Go bo HCC (Uninstall)" \
-            10 "📖  Tro giup (Help)")
+            10 "📖  Tro giup (Help)" \
+            11 "❌  Thoat (Exit)")
 
-        [[ -z "$choice" ]] && break
+        [[ -z "$choice" || "$choice" == "11" ]] && break
         case "$choice" in
             1) tui_menu_desktop ;;
             2) tui_menu_profile ;;
@@ -164,7 +168,8 @@ tui_handle_choice() {
         🤖|7) tui_menu_ai ;;
         📦|8) self_update_dispatch ; read -rp "Enter de tiep tuc..." ;;
         🗑️|9) run_uninstall ; read -rp "Enter de tiep tuc..." ;;
-        📖|10|9) show_help | less ;;
+        📖|10) show_help | less ;;
+        ❌|11) return 9 ;;
     esac
 }
 
@@ -472,30 +477,30 @@ tui_menu_theme() {
             "← Quay lai (Back)" | fzf --prompt="Theme/Plugin > " --height=40% --no-info)
         [[ -z "$choice" || "$choice" == *"Back"* ]] && return
         case "$choice" in
-            "*List themes*"|"*Danh sach Theme*") theme_list_dispatch ; read -rp "Enter de tiep tuc..." ;;
-            "*Install theme*"|"*Cai Theme*")
+            *List*themes*|*Danh*sach*Theme*) run_themes ; read -rp "Enter de tiep tuc..." ;;
+            *Install*theme*|*Cai*Theme*)
                 local name
                 read -rp "Ten theme: " name
-                [[ -n "$name" ]] && theme_install_dispatch "$name"
+                [[ -n "$name" ]] && theme_dispatch install "$name"
                 read -rp "Enter de tiep tuc..."
                 ;;
-            "*Uninstall theme*"|"*Go Theme*")
+            *Uninstall*theme*|*Go*Theme*)
                 local name
                 read -rp "Ten theme: " name
-                [[ -n "$name" ]] && theme_uninstall_dispatch "$name"
+                [[ -n "$name" ]] && theme_dispatch uninstall "$name"
                 read -rp "Enter de tiep tuc..."
                 ;;
-            "*List plugins*"|"*Danh sach Plugin*") plugins_dispatch ; read -rp "Enter de tiep tuc..." ;;
-            "*Install plugin*"|"*Cai Plugin*")
+            *List*plugins*|*Danh*sach*Plugin*) plugins_dispatch ; read -rp "Enter de tiep tuc..." ;;
+            *Install*plugin*|*Cai*Plugin*)
                 local name
                 read -rp "Ten plugin: " name
-                [[ -n "$name" ]] && plugin_install_dispatch "$name"
+                [[ -n "$name" ]] && plugin_dispatch install "$name"
                 read -rp "Enter de tiep tuc..."
                 ;;
-            "*Uninstall plugin*"|"*Go Plugin*")
+            *Uninstall*plugin*|*Go*Plugin*)
                 local name
                 read -rp "Ten plugin: " name
-                [[ -n "$name" ]] && plugin_uninstall_dispatch "$name"
+                [[ -n "$name" ]] && plugin_dispatch uninstall "$name"
                 read -rp "Enter de tiep tuc..."
                 ;;
         esac
@@ -511,12 +516,12 @@ tui_menu_theme() {
             "0" "← Back" 3>&1 1>&2 2>&3)
         [[ -z "$choice" || "$choice" == "0" ]] && return
         case "$choice" in
-            1) theme_list_dispatch ;;
-            2) whiptail --inputbox "Ten theme:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && theme_install_dispatch "$name"; done ;;
-            3) whiptail --inputbox "Ten theme:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && theme_uninstall_dispatch "$name"; done ;;
+            1) run_themes ;;
+            2) whiptail --inputbox "Ten theme:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && theme_dispatch install "$name"; done ;;
+            3) whiptail --inputbox "Ten theme:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && theme_dispatch uninstall "$name"; done ;;
             4) plugins_dispatch ;;
-            5) whiptail --inputbox "Ten plugin:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && plugin_install_dispatch "$name"; done ;;
-            6) whiptail --inputbox "Ten plugin:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && plugin_uninstall_dispatch "$name"; done ;;
+            5) whiptail --inputbox "Ten plugin:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && plugin_dispatch install "$name"; done ;;
+            6) whiptail --inputbox "Ten plugin:" 8 40 3>&1 1>&2 2>&3 | while IFS= read -r name; do [[ -n "$name" ]] && plugin_dispatch uninstall "$name"; done ;;
         esac
         whiptail --msgbox "Xong!" 8 30
     fi
@@ -540,8 +545,8 @@ tui_menu_ai() {
             "← Quay lai (Back)" | fzf --prompt="AI > " --height=30% --no-info)
         [[ -z "$choice" || "$choice" == *"Back"* ]] && return
         case "$choice" in
-            *Setup*|"*Cau hinh*") desktop_ai_setup ; read -rp "Enter de tiep tuc..." ;;
-            *Status*|"*Kiem tra*")
+            *Setup*|*Cau*hinh*) desktop_ai_setup ; read -rp "Enter de tiep tuc..." ;;
+            *Status*|*Kiem*tra*)
                 if desktop_ai_load_key; then
                     print_success "AI API key đã được cấu hình."
                 else
