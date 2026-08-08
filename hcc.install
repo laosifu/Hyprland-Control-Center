@@ -1,0 +1,17 @@
+post_install() {
+    echo "Hyprland Control Center (HCC) installed."
+    echo
+    echo "Run 'hcc' to open the interactive menu."
+    echo "Run 'hcc doctor' to check your system."
+    echo
+    echo "For login screen integration:"
+    echo "  hcc session setup-login"
+}
+
+post_upgrade() {
+    post_install
+}
+
+post_remove() {
+    echo "HCC removed. Your desktop profiles in ~/.local/share/hcc/ are preserved."
+}
