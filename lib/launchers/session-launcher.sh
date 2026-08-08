@@ -7,15 +7,16 @@ SESSION_ID="${1:-}"
 
 HCC_USER_HOME="${HCC_REAL_HOME:-$HOME}"
 
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HCC_USER_HOME/.config}"
-HCC_ACTIVE_FILE="$XDG_CONFIG_HOME/hcc/session-active"
+HCC_DATA_DIR="${HCC_DATA_DIR:-$HCC_USER_HOME/.local/share/hcc}"
+HCC_PROFILE_ROOT="$HCC_DATA_DIR/profiles"
+HCC_ACTIVE_FILE="$HCC_PROFILE_ROOT/active"
 
 if [[ -z "$SESSION_ID" ]]; then
     if [[ -f "$HCC_ACTIVE_FILE" ]]; then
         SESSION_ID="$(head -n 1 "$HCC_ACTIVE_FILE")"
     fi
     if [[ -z "$SESSION_ID" ]]; then
-        echo "HCC: No active session"
+        echo "HCC: No active session" >&2
         exit 1
     fi
 fi
@@ -25,4 +26,12 @@ echo "HCC: $SESSION_ID"
 PATH="/usr/bin:/usr/local/bin:$PATH"
 export PATH
 
-exec /usr/bin/Hyprland
+if [[ -x "/usr/bin/Hyprland" ]]; then
+    exec /usr/bin/Hyprland
+fi
+if command -v Hyprland &>/dev/null; then
+    exec Hyprland
+fi
+
+echo "HCC: Hyprland not found" >&2
+exit 1

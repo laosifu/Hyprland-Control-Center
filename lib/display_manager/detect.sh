@@ -37,6 +37,8 @@ dm_install_entry() {
     local exec_path="${2:-/usr/lib/hcc/session-launcher}"
     local dm
 
+    dm_ensure_launcher "$exec_path"
+
     dm="${HCC_DM:-$(dm_detect && echo "$HCC_DM")}"
     local dir
 
@@ -105,4 +107,35 @@ dm_remove_entry() {
         fi
     done
     [[ "$removed" -eq 1 ]] || print_warning "Khong tim thay login entry: ${desktop_name,,}.desktop"
+}
+
+dm_ensure_launcher() {
+    local exec_path="${1:-/usr/lib/hcc/session-launcher}"
+    local src="$PROJECT_ROOT/lib/launchers/session-launcher.sh"
+
+    if [[ -f "$exec_path" && -x "$exec_path" ]]; then
+        return 0
+    fi
+
+    if [[ ! -f "$src" ]]; then
+        print_warning "Khong tim thay source launcher: $src"
+        return 1
+    fi
+
+    local dir
+    dir="$(dirname "$exec_path")"
+    if [[ -w "$dir" ]]; then
+        cp "$src" "$exec_path" 2>/dev/null && chmod +x "$exec_path"
+    else
+        sudo mkdir -p "$dir" 2>/dev/null
+        sudo cp "$src" "$exec_path" 2>/dev/null
+        sudo chmod +x "$exec_path" 2>/dev/null
+    fi
+
+    if [[ -x "$exec_path" ]]; then
+        print_success "Da cai session launcher: $exec_path"
+        return 0
+    fi
+    print_warning "Khong cai duoc session launcher: $exec_path (can sudo)"
+    return 1
 }
