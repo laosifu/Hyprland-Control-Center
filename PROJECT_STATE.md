@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) — Project State
 
-*Last updated: 2026-07-28 (v0.9.1)*
+*Last updated: 2026-08-08 (v0.9.2)*
 *See `docs/RELEASE.md` for deployment instructions.*
 
 ---
@@ -9,14 +9,14 @@
 
 HCC là Bash framework để cài đặt và quản lý Hyprland desktop — đã phát triển từ CLI tool đơn giản thành distro-agnostic system với package abstraction, TOML config, AUR packages, CI/CD, community registry, và TUI interface.
 
-**Current status: v0.9.0 — published on AUR, 36/36 tests passing, feature-complete for daily use.**
+**Current status: v0.9.2 — 62/62 tests passing, login/session flow fixed, feature-complete for daily use.**
 
 | Metric | Value |
 |---|---|
 | Lines of code | 9,099 |
 | Script files | 185 |
-| Tests | 36 (26 unit + 10 CLI) |
-| Git commits | 43 |
+| Tests | 62 (unit + CLI) |
+| Git commits | 48+ |
 | Contributors | laosifu |
 | Package managers | 9 (pacman, apt, dnf, zypper, nix, xbps, portage, apk, flatpak) + 4 AUR helpers |
 | AUR packages | hcc-bin (stable), hcc-git (dev) |
@@ -62,7 +62,7 @@ Shell Commands
 | Executor | `lib/plan_executor.sh` | Execute with rollback + progress |
 | Services | `services/` | Package, AUR, flatpak, git, filesystem, backup, hook, deployment |
 | Operations | `operations/` | Atomic wrappers around `pm_*` and file commands |
-| Session launcher | `lib/launchers/session-launcher.sh` | DM entry: reads session-active → exec Hyprland |
+| Session launcher | `lib/launchers/session-launcher.sh` | DM entry: reads active profile → exec start-hyprland/Hyprland |
 
 ---
 
@@ -97,7 +97,7 @@ Shell Commands
 | Feature | Details |
 |---|---|
 | Display Manager | Auto-detect SDDM/GDM/LightDM/greetd + install/remove `.desktop` entry |
-| Session launcher | Mot DM entry cho tat ca profiles — doc `session-active` → exec Hyprland |
+| Session launcher | Mot DM entry cho tat ca profiles — doc profile active (`~/.local/share/hcc/profiles/active`) → exec Hyprland |
 | Profile system | List, status, switch — profiles trong `~/.local/share/hcc/profiles/` |
 | Backup/Restore | Snapshot config truoc install, restore tu backup |
 | Doctor | System health check (OS, Hyprland, session, DM, hardware) + recommendations |
@@ -187,7 +187,7 @@ Both have `package.toml` (TOML) + `package.conf` (legacy) + `payload/` + `hooks/
 - `.github/workflows/test.yml` — Arch Linux container test + ShellCheck
 - Runs on push/PR to main
 - ShellCheck config: `.shellcheckrc`
-- 36 tests verified on every push
+- 62 tests verified on every push
 
 ---
 
@@ -217,6 +217,8 @@ bash <(curl -sL https://raw.githubusercontent.com/laosifu/Hyprland-Control-Cente
 
 | Version | Date | Highlights |
 |---|---|---|
+| v0.9.2 | 2026-08-08 | Fix login/session flow: launcher reads `$HCC_DATA_DIR/profiles/active` (khong con `session-active`), `dm_ensure_launcher()` tu cai launcher khi tao login entry, uninstall 16 items + `0=all`, session naming, sudo gom 1 lan, launcher dung `start-hyprland` |
+| v0.9.1 | 2026-07-28 | (xem release note AUR hcc-bin) |
 | v0.9.0 | 2026-07-28 | TUI default, self-update, doctor recommendations, config diff, desktop export, AI fallback, Flatpak GUI apps, 10 community profiles, session sudo fix, complete README rewrite |
 | v0.8.0 | 2026-07-28 | AUR publish, community registry, super command, CI, tech debt, release |
 | v0.7.0 | 2026-07-25 | Flatpak, batch install, DM abstraction, desktop init/update wizard |

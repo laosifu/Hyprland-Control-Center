@@ -284,7 +284,7 @@ Gửi desktop của bạn qua `hcc desktop submit <id>`.
 
 ### Display Manager
 
-Tự động phát hiện SDDM, GDM, LightDM, greetd. Cài session entries tự động.
+Tự động phát hiện SDDM, GDM, LightDM, greetd. Cài session entries tự động. Session launcher tự được cài vào `/usr/lib/hcc/session-launcher` (sudo nếu cần) và khởi động Hyprland qua `start-hyprland` (fallback `/usr/bin/Hyprland`).
 
 ---
 
@@ -464,6 +464,8 @@ Google Gemini có **free tier** (60 requests/phút). Lấy API key tại https:/
 
 | Phiên bản | Ngày | Nổi bật |
 |---|---|---|
+| v0.9.2 | 2026-08-08 | Fix login/session: launcher đọc đúng file active, tự cài session-launcher khi tạo login entry, uninstall 16 items + `0=all`, sudo gom 1 lần, dùng `start-hyprland` |
+| v0.9.0 | 2026-07-28 | TUI default, self-update, doctor recommendations, config diff, desktop export, AI fallback, Flatpak GUI apps, 10 community profiles, session sudo fix, README rewrite |
 | v0.8.0 | 2026-07-28 | AUR packages, community registry, super command, CI/CD |
 | v0.7.0 | 2026-07-25 | Flatpak, batch install, DM abstraction, init wizard |
 | v0.6.0 | 2026-07-24 | TOML config, Python parser, Gemini AI |

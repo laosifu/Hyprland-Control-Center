@@ -26,6 +26,9 @@ echo "HCC: $SESSION_ID"
 PATH="/usr/bin:/usr/local/bin:$PATH"
 export PATH
 
+if command -v start-hyprland &>/dev/null; then
+    exec start-hyprland
+fi
 if [[ -x "/usr/bin/Hyprland" ]]; then
     exec /usr/bin/Hyprland
 fi

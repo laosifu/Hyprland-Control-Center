@@ -284,7 +284,7 @@ Submit your own via `hcc desktop submit <id>`.
 
 ### Display Manager Support
 
-Auto-detects SDDM, GDM, LightDM, greetd. Installs session entries automatically.
+Auto-detects SDDM, GDM, LightDM, greetd. Installs session entries automatically. The session launcher is auto-installed to `/usr/lib/hcc/session-launcher` (sudo when needed) and starts Hyprland via `start-hyprland` (fallback `/usr/bin/Hyprland`).
 
 ---
 
@@ -464,6 +464,8 @@ Google Gemini has a **free tier** (60 requests/minute). Get your key at https://
 
 | Version | Date | Highlights |
 |---|---|---|
+| v0.9.2 | 2026-08-08 | Login/session fixes: launcher reads the correct active profile, auto-installs session-launcher when creating a login entry, uninstall 16 items + `0=all`, single sudo pass, launch via `start-hyprland` |
+| v0.9.0 | 2026-07-28 | TUI default, self-update, doctor recommendations, config diff, desktop export, AI fallback, Flatpak GUI apps, 10 community profiles, session sudo fix, README rewrite |
 | v0.8.0 | 2026-07-28 | AUR packages, community registry, super command, CI/CD, release |
 | v0.7.0 | 2026-07-25 | Flatpak, batch install, DM abstraction, init wizard |
 | v0.6.0 | 2026-07-24 | TOML config, Python parser, Gemini AI integration |
