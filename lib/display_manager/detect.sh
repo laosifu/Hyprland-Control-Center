@@ -79,7 +79,11 @@ DesktopNames=Hyprland
     else
         printf '%s' "$content" | sudo tee "$desktop_file" >/dev/null
     fi
-    print_success "Created: $desktop_file"
+    if [[ -f "$desktop_file" ]]; then
+        print_success "Created: $desktop_file"
+    else
+        print_warning "Khong the tao: $desktop_file (can sudo)"
+    fi
 }
 
 dm_remove_entry() {
