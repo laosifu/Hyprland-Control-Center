@@ -62,32 +62,43 @@ dm_install_entry() {
     fi
 
     local desktop_file="$dir/${desktop_name,,}.desktop"
-    if [[ ! -f "$desktop_file" ]]; then
-        cat > "$desktop_file" << EOF
-[Desktop Entry]
+    local content="[Desktop Entry]
 Name=$desktop_name
 Comment=Hyprland Control Center
 Exec=$exec_path
 Type=Application
 DesktopNames=Hyprland
-EOF
-        print_success "Created: $desktop_file"
-    else
+"
+    if [[ -f "$desktop_file" ]]; then
         print_info "Already exists: $desktop_file"
+        return 0
     fi
+
+    if [[ -w "$dir" ]]; then
+        printf '%s' "$content" > "$desktop_file"
+    else
+        printf '%s' "$content" | sudo tee "$desktop_file" >/dev/null
+    fi
+    print_success "Created: $desktop_file"
 }
 
 dm_remove_entry() {
     local desktop_name="${1:-HCC}"
     local dirs
     dirs="$(dm_wayland_sessions_dir) $(dm_xsessions_dir)"
-    local dir file
+    local dir file removed=0
 
     for dir in $dirs; do
         file="$dir/${desktop_name,,}.desktop"
         if [[ -f "$file" ]]; then
-            rm -f "$file"
+            if [[ -w "$dir" ]]; then
+                rm -f "$file"
+            else
+                sudo rm -f "$file"
+            fi
             print_success "Removed: $file"
+            removed=1
         fi
     done
+    [[ "$removed" -eq 1 ]] || print_warning "Khong tim thay login entry: ${desktop_name,,}.desktop"
 }

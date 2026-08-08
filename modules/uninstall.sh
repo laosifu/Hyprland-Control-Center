@@ -174,9 +174,7 @@ run_uninstall_show_menu() {
         fi
     fi
 
-    for k in "${selected[@]}"; do
-        run_uninstall_item "$k"
-    done
+    run_uninstall_items "${selected[@]}"
     return 0
 }
 
@@ -209,6 +207,56 @@ run_uninstall_backup() {
         print_warning "Khong co gi de backup."
         rm -rf "$target" 2>/dev/null || true
         return 1
+    fi
+}
+
+run_uninstall_root_batch() {
+    local session_name="${SESSION_NAME:-HCC}"
+    local user_item
+    local script=""
+
+    for user_item in "$@"; do
+        case "$user_item" in
+            login_entry)
+                script+="rm -f /usr/share/wayland-sessions/${session_name,,}.desktop; rm -f /usr/share/xsessions/${session_name,,}.desktop; "
+                ;;
+            session_launcher)
+                script+="rm -f /usr/lib/hcc/session-launcher; rmdir /usr/lib/hcc 2>/dev/null; "
+                ;;
+            bash_comp)
+                script+="rm -f /usr/share/bash-completion/completions/hcc; "
+                ;;
+            hcc_install)
+                script+="rm -f /usr/bin/hcc; rm -rf /usr/share/hcc; rm -rf /usr/lib/hcc; "
+                ;;
+            aur_installed)
+                script+="if command -v pacman &>/dev/null; then if pacman -Qi hcc-bin &>/dev/null 2>&1; then pacman -R --noconfirm hcc-bin 2>/dev/null || yay -R hcc-bin 2>/dev/null; fi; if pacman -Qi hcc-git &>/dev/null 2>&1; then pacman -R --noconfirm hcc-git 2>/dev/null || yay -R hcc-git 2>/dev/null; fi; fi; "
+                ;;
+        esac
+    done
+
+    if [[ -n "$script" ]]; then
+        sudo bash -c "$script"
+    fi
+}
+
+run_uninstall_items() {
+    local item
+    local -a root_items
+
+    for item in "$@"; do
+        case "$item" in
+            login_entry|session_launcher|bash_comp|hcc_install|aur_installed)
+                root_items+=("$item")
+                ;;
+            *)
+                run_uninstall_item "$item"
+                ;;
+        esac
+    done
+
+    if [[ ${#root_items[@]} -gt 0 ]]; then
+        run_uninstall_root_batch "${root_items[@]}"
     fi
 }
 
@@ -262,7 +310,11 @@ run_uninstall_item() {
                 for t in "$theme_dir"/*/; do
                     [[ -d "$t" ]] || continue
                     [[ "$(basename "$t")" == "example" ]] && continue
-                    rm -rf "$t" 2>/dev/null || true
+                    if [[ -w "$theme_dir" ]]; then
+                        rm -rf "$t" 2>/dev/null || true
+                    else
+                        sudo rm -rf "$t" 2>/dev/null || true
+                    fi
                     print_success "  Da xoa theme: $(basename "$t")"
                 done
             else
@@ -275,7 +327,11 @@ run_uninstall_item() {
                 for p in "$plugin_dir"/*/; do
                     [[ -d "$p" ]] || continue
                     [[ "$(basename "$p")" == "example" ]] && continue
-                    rm -rf "$p" 2>/dev/null || true
+                    if [[ -w "$plugin_dir" ]]; then
+                        rm -rf "$p" 2>/dev/null || true
+                    else
+                        sudo rm -rf "$p" 2>/dev/null || true
+                    fi
                     print_success "  Da xoa plugin: $(basename "$p")"
                 done
             else
@@ -342,18 +398,19 @@ run_uninstall() {
             return 0
             ;;
         --all|all)
-            run_uninstall_item login_entry
-            run_uninstall_item session_launcher
-            run_uninstall_item symlink
-            run_uninstall_item bash_comp
-            run_uninstall_item fish_comp
-            run_uninstall_item path_entries
-            run_uninstall_item installed_themes
-            run_uninstall_item installed_plugins
-            run_uninstall_item config
-            run_uninstall_item data
-            run_uninstall_item aur_installed
-            run_uninstall_item hcc_install
+            run_uninstall_items \
+                login_entry \
+                session_launcher \
+                symlink \
+                bash_comp \
+                fish_comp \
+                path_entries \
+                installed_themes \
+                installed_plugins \
+                config \
+                data \
+                aur_installed \
+                hcc_install
             print_success "Da xoa toan bo HCC khoi he thong."
             return 0
             ;;
