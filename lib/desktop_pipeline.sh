@@ -28,7 +28,7 @@ desktop_pipeline_finalize() {
     local id="${ID:-}"
 
     if [[ -n "$id" ]]; then
-        dm_install_entry "HCC" "/usr/lib/hcc/session-launcher" 2>/dev/null || true
+        dm_install_entry "${SESSION_NAME:-HCC}" "/usr/lib/hcc/session-launcher" 2>/dev/null || true
     fi
 
     desktop_finalize_message

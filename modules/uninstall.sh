@@ -63,17 +63,23 @@ run_uninstall_show_menu() {
     order+=("backups|Backup snapshots (trong ~/.local/share/hcc/backups)")
     choices[logs]="9"
     order+=("logs|Log files (trong ~/.local/share/hcc/logs)")
-    choices[bash_comp]="a"
+    choices[installed_themes]="10"
+    order+=("installed_themes|Installed themes (trong $PROJECT_ROOT/themes)")
+    choices[installed_plugins]="11"
+    order+=("installed_plugins|Installed plugins (trong $PROJECT_ROOT/plugins)")
+    choices[bash_comp]="12"
     order+=("bash_comp|Bash completions (/usr/share/bash-completion/completions/hcc)")
-    choices[fish_comp]="b"
+    choices[fish_comp]="13"
     order+=("fish_comp|Fish completions (~/.config/fish/completions/hcc.fish)")
-    choices[path_entries]="c"
+    choices[path_entries]="14"
     order+=("path_entries|PATH entries in shell config (.bashrc, .zshrc, config.fish)")
-    choices[aur_installed]="d"
+    choices[aur_installed]="15"
     order+=("aur_installed|AUR package (hcc-bin/hcc-git) - se go bang pacman")
+    choices[hcc_install]="16"
+    order+=("hcc_install|HCC install (/usr/bin/hcc + /usr/share/hcc) - go bo chinh no")
 
     local -A descriptions
-    descriptions[login_entry]="Xoa muc 'HCC' khoi man hinh login DM"
+    descriptions[login_entry]="Xoa muc '${SESSION_NAME:-HCC}' khoi man hinh login DM"
     descriptions[session_launcher]="Xoa /usr/lib/hcc/session-launcher"
     descriptions[symlink]="Xoa symlink $HOME/.local/bin/hcc"
     descriptions[config]="Xoa toan bo cau hinh (AI key, session-active)"
@@ -82,15 +88,19 @@ run_uninstall_show_menu() {
     descriptions[profiles]="Xoa cau hinh profile da kich hoat"
     descriptions[backups]="Xoa cac ban snapshot backup"
     descriptions[logs]="Xoa log files"
+    descriptions[installed_themes]="Xoa cac theme da cai trong $PROJECT_ROOT/themes"
+    descriptions[installed_plugins]="Xoa cac plugin da cai trong $PROJECT_ROOT/plugins"
     descriptions[bash_comp]="Xoa bash completions"
     descriptions[fish_comp]="Xoa fish completions"
     descriptions[path_entries]="Xoa dong 'export PATH=.../.local/bin' khoi shell config"
     descriptions[aur_installed]="Go bo AUR package (yay -R hcc-bin/hcc-git)"
+    descriptions[hcc_install]="Xoa /usr/bin/hcc va /usr/share/hcc (go bo hoan toan)"
 
     echo
     print_header "HCC Uninstall - Chon thanh phan can xoa"
     echo
     print_info "Nhap cac ma tuong ung (vd: 1 3 5 hoac 1-5). Enter de bo qua."
+    print_info "  0 = XOA TOAN BO (ca HCC lan moi thu da cai) - co hoi backup truoc"
     echo
 
     local idx=1
@@ -154,20 +164,63 @@ run_uninstall_show_menu() {
         return 1
     fi
 
+    if [[ "$raw" == "0" ]]; then
+        local backup_ans
+        read -rp "Ban co muon backup truoc khi xoa toan bo? [y/N] " backup_ans
+        if [[ "$backup_ans" =~ ^[yY]$ ]]; then
+            run_uninstall_backup
+        else
+            print_warning "Khong tao backup. Du lieu se bi xoa vinh vien."
+        fi
+    fi
+
     for k in "${selected[@]}"; do
         run_uninstall_item "$k"
     done
     return 0
 }
 
+run_uninstall_backup() {
+    local backup_root target
+    local src
+
+    backup_root="$(get_backup_dir)"
+    target="$backup_root/uninstall-backup-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$target" 2>/dev/null || return 1
+
+    for src in \
+        "$HOME/.config/hcc" \
+        "$HOME/.local/share/hcc/profiles" \
+        "$HOME/.local/share/hcc/desktops" \
+        "$HOME/.local/share/hcc/backups" \
+        "$PROJECT_ROOT/themes" \
+        "$PROJECT_ROOT/plugins"
+    do
+        [[ -d "$src" ]] || continue
+        cp -a "$src" "$target/" 2>/dev/null || true
+    done
+
+    if [[ -f "$HOME/.config/hcc/config.conf" || -d "$HOME/.config/hcc" || -d "$HOME/.local/share/hcc" ]]; then
+        print_success "Backup truoc khi go: $target"
+        print_info "Sau khi cai lai HCC, chay 'hcc backup restore <ten-backup>' de khoi phuc."
+        echo "  -> Luu y: copy thu muc '${target##*/}' trong $backup_root sang he thong moi."
+        return 0
+    else
+        print_warning "Khong co gi de backup."
+        rm -rf "$target" 2>/dev/null || true
+        return 1
+    fi
+}
+
 run_uninstall_item() {
     local item="$1"
     case "$item" in
         login_entry)
+            local session_name="${SESSION_NAME:-HCC}"
             if command -v dm_remove_entry &>/dev/null; then
-                dm_remove_entry "HCC" "/usr/lib/hcc/session-launcher" 2>/dev/null || true
+                dm_remove_entry "$session_name" "/usr/lib/hcc/session-launcher" 2>/dev/null || true
             fi
-            sudo rm -f /usr/share/wayland-sessions/hcc.desktop 2>/dev/null || true
+            sudo rm -f "/usr/share/wayland-sessions/${session_name,,}.desktop" 2>/dev/null || true
             print_success "  Da xoa login entry"
             ;;
         session_launcher)
@@ -203,6 +256,32 @@ run_uninstall_item() {
             rm -rf "$HOME/.local/share/hcc/logs" 2>/dev/null || true
             print_success "  Da xoa log files"
             ;;
+        installed_themes)
+            local theme_dir="$PROJECT_ROOT/themes"
+            if [[ -d "$theme_dir" ]]; then
+                for t in "$theme_dir"/*/; do
+                    [[ -d "$t" ]] || continue
+                    [[ "$(basename "$t")" == "example" ]] && continue
+                    rm -rf "$t" 2>/dev/null || true
+                    print_success "  Da xoa theme: $(basename "$t")"
+                done
+            else
+                print_warning "  Khong co theme nao"
+            fi
+            ;;
+        installed_plugins)
+            local plugin_dir="$PROJECT_ROOT/plugins"
+            if [[ -d "$plugin_dir" ]]; then
+                for p in "$plugin_dir"/*/; do
+                    [[ -d "$p" ]] || continue
+                    [[ "$(basename "$p")" == "example" ]] && continue
+                    rm -rf "$p" 2>/dev/null || true
+                    print_success "  Da xoa plugin: $(basename "$p")"
+                done
+            else
+                print_warning "  Khong co plugin nao"
+            fi
+            ;;
         bash_comp)
             sudo rm -f /usr/share/bash-completion/completions/hcc 2>/dev/null || true
             print_success "  Da xoa bash completions"
@@ -224,15 +303,31 @@ run_uninstall_item() {
             done
             ;;
         aur_installed)
-            if command -v hcc-bin &>/dev/null; then
-                print_info "  Dang go AUR package hcc-bin..."
-                yay -R hcc-bin 2>/dev/null || sudo pacman -R hcc-bin 2>/dev/null || print_warning "  Tu go: yay -R hcc-bin"
-            fi
-            if command -v hcc-git &>/dev/null; then
-                print_info "  Dang go AUR package hcc-git..."
-                yay -R hcc-git 2>/dev/null || sudo pacman -R hcc-git 2>/dev/null || print_warning "  Tu go: yay -R hcc-git"
+            if command -v pacman &>/dev/null; then
+                if pacman -Qi hcc-bin &>/dev/null 2>&1; then
+                    print_info "  Dang go AUR package hcc-bin..."
+                    yay -R hcc-bin 2>/dev/null || paru -R hcc-bin 2>/dev/null || sudo pacman -R hcc-bin 2>/dev/null || print_warning "  Tu go: yay -R hcc-bin"
+                fi
+                if pacman -Qi hcc-git &>/dev/null 2>&1; then
+                    print_info "  Dang go AUR package hcc-git..."
+                    yay -R hcc-git 2>/dev/null || paru -R hcc-git 2>/dev/null || sudo pacman -R hcc-git 2>/dev/null || print_warning "  Tu go: yay -R hcc-git"
+                fi
             fi
             print_success "  Da go AUR package"
+            ;;
+        hcc_install)
+            if [[ -f "/usr/bin/hcc" || -L "/usr/bin/hcc" ]]; then
+                sudo rm -f /usr/bin/hcc 2>/dev/null || true
+                print_success "  Da xoa /usr/bin/hcc"
+            fi
+            if [[ -d "/usr/share/hcc" ]]; then
+                sudo rm -rf /usr/share/hcc 2>/dev/null || true
+                print_success "  Da xoa /usr/share/hcc"
+            fi
+            if [[ -d "/usr/lib/hcc" ]]; then
+                sudo rm -rf /usr/lib/hcc 2>/dev/null || true
+                print_success "  Da xoa /usr/lib/hcc"
+            fi
             ;;
     esac
 }
@@ -253,9 +348,12 @@ run_uninstall() {
             run_uninstall_item bash_comp
             run_uninstall_item fish_comp
             run_uninstall_item path_entries
+            run_uninstall_item installed_themes
+            run_uninstall_item installed_plugins
             run_uninstall_item config
             run_uninstall_item data
             run_uninstall_item aur_installed
+            run_uninstall_item hcc_install
             print_success "Da xoa toan bo HCC khoi he thong."
             return 0
             ;;
