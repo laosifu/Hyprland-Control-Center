@@ -76,7 +76,7 @@ run_uninstall_show_menu() {
     choices[aur_installed]="15"
     order+=("aur_installed|AUR package (hcc-bin/hcc-git) - se go bang pacman")
     choices[hcc_install]="16"
-    order+=("hcc_install|HCC install (/usr/bin/hcc + /usr/share/hcc) - go bo chinh no")
+    order+=("hcc_install|Uninstall HCC (/usr/bin/hcc + /usr/share/hcc) - go bo chinh bang nay")
 
     local -A descriptions
     descriptions[login_entry]="Xoa muc '${SESSION_NAME:-HCC}' khoi man hinh login DM"
@@ -94,79 +94,111 @@ run_uninstall_show_menu() {
     descriptions[fish_comp]="Xoa fish completions"
     descriptions[path_entries]="Xoa dong 'export PATH=.../.local/bin' khoi shell config"
     descriptions[aur_installed]="Go bo AUR package (yay -R hcc-bin/hcc-git)"
-    descriptions[hcc_install]="Xoa /usr/bin/hcc va /usr/share/hcc (go bo hoan toan)"
+    descriptions[hcc_install]="Xoa /usr/bin/hcc va /usr/share/hcc (go bo hoan toan HCC)"
 
-    echo
     print_header "HCC Uninstall - Chon thanh phan can xoa"
     echo
-    print_info "Nhap cac ma tuong ung (vd: 1 3 5 hoac 1-5). Enter de bo qua."
-    print_info "  0 = XOA TOAN BO (ca HCC lan moi thu da cai) - co hoi backup truoc"
+    print_info "Gõ số mục (vd: 1 3 5) cach nhau boi dau cach, hoac 1-5 cho khoang. Nhap 'a' = chon tat ca. Enter (bo trong) de khong xoa gi."
     echo
 
+    local -A check
+    local -A sel_items
+    local -A idx_map
     local idx=1
-    local -A map
     for entry in "${order[@]}"; do
         local k="${entry%%|*}"
-        local d="${entry#*|}"
-        local status=" "
-        echo "  $idx) $status $d"
-        map[$idx]="$k"
+        echo "  $idx)  [ ]  ${entry#*|}"
+        idx_map[$idx]="$k"
         ((idx++))
     done
+    local total=$((idx-1))
     echo
 
-    local raw
-    read -rp "Chon [1-$(($idx-1)), cach nhau boi dau cach, hoac 0=all]: " raw
-
-    [[ -z "$raw" ]] && return 1
-
-    local -a selected
-    if [[ "$raw" == "0" ]]; then
-        for entry in "${order[@]}"; do
-            selected+=("${entry%%|*}")
+    while true; do
+        local raw
+        read -rp "Nhap so de tick/bo-tick, 'a'=chon tat ca, 'n'=bo het, rong de XAC NHAN: " raw
+        if [[ -z "$raw" ]]; then
+            break
+        elif [[ "$raw" == "a" || "$raw" == "A" ]]; then
+            for i in $(seq 1 "$total"); do
+                check[$i]=1
+                sel_items["${idx_map[$i]}"]=1
+            done
+        elif [[ "$raw" == "n" || "$raw" == "N" ]]; then
+            check=()
+            sel_items=()
+        else
+            local t
+            for t in $raw; do
+                if [[ "$t" == *-* ]]; then
+                    local s e
+                    s="${t%-*}"
+                    e="${t#*-}"
+                    [[ "$s" =~ ^[0-9]+$ && "$e" =~ ^[0-9]+$ ]] || continue
+                    (( s > e )) && { local tmp=$s; s=$e; e=$tmp; }
+                    for ((i=s; i<=e && i<=total; i++)); do
+                        ((i<1)) && continue
+                        if [[ -n "${check[$i]:-}" ]]; then
+                            unset 'check[$i]'
+                            unset "sel_items[${idx_map[$i]}]"
+                        else
+                            check[$i]=1
+                            sel_items["${idx_map[$i]}"]=1
+                        fi
+                    done
+                elif [[ "$t" =~ ^[0-9]+$ ]]; then
+                    ((t>=1 && t<=total)) || continue
+                    if [[ -n "${check[$t]:-}" ]]; then
+                        unset 'check[$t]'
+                        unset "sel_items[${idx_map[$t]}]"
+                    else
+                        check[$t]=1
+                        sel_items["${idx_map[$t]}"]=1
+                    fi
+                fi
+            done
+        fi
+        echo
+        local i
+        for i in $(seq 1 "$total"); do
+            local mark=" "
+            [[ -n "${check[$i]:-}" ]] && mark="x"
+            printf "  %2d)  [%s]  %s\n" "$i" "$mark" "${order[$((i-1))]#*|}"
         done
-    else
-        local tokens
-        tokens=($raw)
-        for t in "${tokens[@]}"; do
-            if [[ "$t" == *-* ]]; then
-                local start="${t%-*}"
-                local end="${t#*-}"
-                for ((i=start; i<=end; i++)); do
-                    [[ -n "${map[$i]:-}" ]] && selected+=("${map[$i]}")
-                done
-            else
-                [[ -n "${map[$t]:-}" ]] && selected+=("${map[$t]}")
-            fi
-        done
-    fi
+        echo
+    done
+
+    local -a selected=()
+    local k2
+    for k2 in "${!sel_items[@]}"; do
+        selected+=("$k2")
+    done
 
     if [[ ${#selected[@]} -eq 0 ]]; then
-        print_warning "Khong co thanh phan nao duoc chon."
+        print_warning "Khong co thanh phan nao duoc chon. Huy."
         return 1
     fi
 
     echo
     print_info "Cac thanh phan se bi xoa:"
-    for k in "${selected[@]}"; do
-        echo "  - ${descriptions[$k]:-Xoa $k}"
+    local dk
+    for dk in "${selected[@]}"; do
+        echo "  - ${descriptions[$dk]:-Xoa $dk}"
     done
     echo
 
     local confirm
     read -rp "Xac nhan xoa? (go 'YES' hoac 'y' de xoa): " confirm
-    if [[ "$confirm" == "YES" ]]; then
-        :
-    elif [[ "$confirm" =~ ^[yY]$ ]]; then
+    if [[ "$confirm" == "YES" || "$confirm" =~ ^[yY]$ ]]; then
         :
     else
         print_info "Da huy."
         return 1
     fi
 
-    if [[ "$raw" == "0" ]]; then
+    if [[ -n "${sel_items[hcc_install]:-}" && -n "${sel_items[data]:-}" ]]; then
         local backup_ans
-        read -rp "Ban co muon backup truoc khi xoa toan bo? [y/N] " backup_ans
+        read -rp "Ban co muon backup truoc khi xoa? [y/N] " backup_ans
         if [[ "$backup_ans" =~ ^[yY]$ ]]; then
             run_uninstall_backup
         else
