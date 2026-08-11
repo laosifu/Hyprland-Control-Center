@@ -85,29 +85,76 @@ config_toml_to_legacy() {
 
     local i pkg
 
+    local distro_block=""
+    local -a distro_candidates=("${HCC_DISTRO_ID:-}" ${HCC_DISTRO_ID_LIKE:-})
+
+    # First pass: pick the best-matching [packages.<distro>] block based on ID_LIKE
+    local cand distro_var
+    for cand in "${distro_candidates[@]}"; do
+        [[ -n "$cand" ]] || continue
+        distro_var="PACKAGES_$(echo "$cand" | tr '[:lower:]-' '[:upper:]_')_REQUIRED__LEN"
+        if [[ -n "${!distro_var:-}" ]]; then
+            distro_block="$cand"
+            break
+        fi
+    done
+
+    local pkg_prefix=""
+    if [[ -n "$distro_block" ]]; then
+        pkg_prefix="$(echo "$distro_block" | tr '[:lower:]-' '[:upper:]_')_"
+    fi
+
+    local required_len_var="PACKAGES_${pkg_prefix}REQUIRED__LEN"
+    local flatpak_len_var="PACKAGES_${pkg_prefix}FLATPAK__LEN"
+    local aur_len_var="PACKAGES_${pkg_prefix}AUR__LEN"
+
     PACKAGES=""
-    for ((i=0; i<${PACKAGES_REQUIRED__LEN:-0}; i++)); do
-        local var="PACKAGES_REQUIRED_${i}"
+    for ((i=0; i<${!required_len_var:-0}; i++)); do
+        local var="PACKAGES_${pkg_prefix}REQUIRED_${i}"
         pkg="${!var}"
         PACKAGES="$PACKAGES $pkg"
     done
     PACKAGES="$(echo "$PACKAGES" | xargs)"
 
     FLATPAK_PACKAGES=""
-    for ((i=0; i<${PACKAGES_FLATPAK__LEN:-0}; i++)); do
-        local var="PACKAGES_FLATPAK_${i}"
+    for ((i=0; i<${!flatpak_len_var:-0}; i++)); do
+        local var="PACKAGES_${pkg_prefix}FLATPAK_${i}"
         pkg="${!var}"
         FLATPAK_PACKAGES="$FLATPAK_PACKAGES $pkg"
     done
     FLATPAK_PACKAGES="$(echo "$FLATPAK_PACKAGES" | xargs)"
 
     AUR_PACKAGES=""
-    for ((i=0; i<${PACKAGES_AUR__LEN:-0}; i++)); do
-        local var="PACKAGES_AUR_${i}"
+    for ((i=0; i<${!aur_len_var:-0}; i++)); do
+        local var="PACKAGES_${pkg_prefix}AUR_${i}"
         pkg="${!var}"
         AUR_PACKAGES="$AUR_PACKAGES $pkg"
     done
     AUR_PACKAGES="$(echo "$AUR_PACKAGES" | xargs)"
+
+    # Fallback to top-level [packages] if no distro-specific block matched
+    if [[ -z "$PACKAGES" ]]; then
+        for ((i=0; i<${PACKAGES_REQUIRED__LEN:-0}; i++)); do
+            local var="PACKAGES_REQUIRED_${i}"
+            pkg="${!var}"
+            PACKAGES="$PACKAGES $pkg"
+        done
+        PACKAGES="$(echo "$PACKAGES" | xargs)"
+
+        for ((i=0; i<${PACKAGES_FLATPAK__LEN:-0}; i++)); do
+            local var="PACKAGES_FLATPAK_${i}"
+            pkg="${!var}"
+            FLATPAK_PACKAGES="$FLATPAK_PACKAGES $pkg"
+        done
+        FLATPAK_PACKAGES="$(echo "$FLATPAK_PACKAGES" | xargs)"
+
+        for ((i=0; i<${PACKAGES_AUR__LEN:-0}; i++)); do
+            local var="PACKAGES_AUR_${i}"
+            pkg="${!var}"
+            AUR_PACKAGES="$AUR_PACKAGES $pkg"
+        done
+        AUR_PACKAGES="$(echo "$AUR_PACKAGES" | xargs)"
+    fi
 
     if [[ -n "$PACKAGES" && -z "${PACMAN_PACKAGES:-}" ]]; then
         PACMAN_PACKAGES="$PACKAGES"

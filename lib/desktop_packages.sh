@@ -67,16 +67,19 @@ desktop_package_validate() {
 
 desktop_package_is_supported() {
 
-    local os_id
     local distro
 
     [[ -z "${SUPPORTED_DISTROS:-}" ]] && return 0
 
-    os_id="$(. /etc/os-release; printf '%s' "$ID")"
+    # Ensure package manager detection has run so we can match ID_LIKE
+    if ! command -v pm_detect &>/dev/null; then
+        return 0
+    fi
+    [[ -n "${HCC_DISTRO_ID:-}" ]] || pm_detect_distro 2>/dev/null || true
 
     for distro in $SUPPORTED_DISTROS
     do
-        [[ "$distro" == "$os_id" ]] && return 0
+        pm_distro_matches "$distro" && return 0
     done
 
     return 1
