@@ -73,16 +73,48 @@ fi
 info "[3/6] Cài đặt HCC..."
 
 install_dir="$HOME/.local/share/hcc"
+repo_url="https://github.com/laosifu/Hyprland-Control-Center"
+release_tag="$(curl -fsSL https://api.github.com/repos/laosifu/Hyprland-Control-Center/releases/latest 2>/dev/null | grep -m1 '"tag_name"' | cut -d'"' -f4 || echo "v0.9.2")"
+tarball_url="$repo_url/archive/refs/tags/$release_tag.tar.gz"
+
+download_release() {
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    warn "  Đang tải release $release_tag từ GitHub..."
+    if curl -fsSL "$tarball_url" -o "$tmp_dir/hcc.tar.gz"; then
+        tar -xzf "$tmp_dir/hcc.tar.gz" -C "$tmp_dir"
+        local src_dir
+        src_dir="$(find "$tmp_dir" -maxdepth 1 -type d -name 'Hyprland-Control-Center-*' | head -n1)"
+        if [[ -n "$src_dir" ]]; then
+            mkdir -p "$install_dir"
+            cp -a "$src_dir"/. "$install_dir"/
+            rm -rf "$tmp_dir"
+            return 0
+        fi
+        rm -rf "$tmp_dir"
+    fi
+    return 1
+}
 
 if [[ -d "$install_dir" ]]; then
     info "  HCC đã có sẵn, đang cập nhật..."
-    git -C "$install_dir" pull --ff-only 2>/dev/null || {
-        warn "  Không thể cập nhật tự động. Bạn có thể clone lại thủ công."
-    }
+    if ! download_release; then
+        warn "  Không tải được release tarball, thử git pull..."
+        git -C "$install_dir" pull --ff-only 2>/dev/null || {
+            warn "  Không thể cập nhật tự động. Bạn có thể clone lại thủ công."
+        }
+    else
+        ok "  Đã cập nhật HCC lên $release_tag"
+    fi
 else
     mkdir -p "$(dirname "$install_dir")"
-    git clone https://github.com/laosifu/Hyprland-Control-Center.git "$install_dir"
-    ok "  Đã clone HCC vào $install_dir"
+    if download_release; then
+        ok "  Đã cài HCC $release_tag từ GitHub"
+    else
+        warn "  Không tải được release, fallback sang git clone..."
+        git clone "$repo_url.git" "$install_dir"
+        ok "  Đã clone HCC vào $install_dir"
+    fi
 fi
 
 #

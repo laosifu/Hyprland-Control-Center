@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-deb:
+    name: Build .deb
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build .deb
+        run: bash scripts/package-deb.sh
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: dist/deb/*.deb
+
+  build-rpm:
+    name: Build .rpm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install rpmbuild
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Build .rpm
+        run: bash scripts/package-rpm.sh
+
+      - name: Upload .rpm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: dist/rpm/*.rpm
+
+  release:
+    name: Publish release
+    needs: [ build-deb, build-rpm ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download .deb
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-package
+          path: artifacts/
+
+      - name: Download .rpm
+        uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: artifacts/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
