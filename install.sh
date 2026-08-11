@@ -202,9 +202,13 @@ echo
 echo "  Bước tiếp theo:"
 echo
 echo "    1. Mở terminal mới (hoặc: source $shell_config)"
-echo "    2. Chạy: hcc doctor          ← kiểm tra hệ thống"
-echo "    3. Chạy: hcc desktop list    ← xem desktop có sẵn"
-echo "    4. Chạy: hcc desktop install <tên>  ← cài desktop"
+echo "    2. Chạy: hcc               ← mở menu HCC (TUI)"
+echo "    3. Chạy: hcc doctor        ← kiểm tra hệ thống"
+echo "    4. Chạy: hcc desktop list  ← xem desktop có sẵn"
+echo "    5. Chạy: hcc desktop install <tên>  ← cài desktop"
+echo
+echo "  Lệnh 'hcc' mở menu tương tác — chọn tính năng bằng phím số:"
+echo "  [1] desktop   [2] profile   [3] system   [5] theme   [8] self-update"
 echo
 echo "  Desktop có sẵn:"
 echo
