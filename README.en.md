@@ -482,6 +482,7 @@ Google Gemini has a **free tier** (60 requests/minute). Get your key at https://
 
 | Version | Date | Highlights |
 |---|---|---|
+| v0.9.3 | 2026-08-11 | Multi-distro foundation: `ID_LIKE` detection, TOML `[packages.<distro>]` blocks, expanded package map (dnf/zypper/xbps/apk) |
 | v0.9.2 | 2026-08-08 | Login/session fixes: launcher reads the correct active profile, auto-installs session-launcher when creating a login entry, uninstall 16 items + `0=all`, single sudo pass, launch via `start-hyprland` |
 | v0.9.0 | 2026-07-28 | TUI default, self-update, doctor recommendations, config diff, desktop export, AI fallback, Flatpak GUI apps, 10 community profiles, session sudo fix, README rewrite |
 | v0.8.0 | 2026-07-28 | AUR packages, community registry, super command, CI/CD, release |

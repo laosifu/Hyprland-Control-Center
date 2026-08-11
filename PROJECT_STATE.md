@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) — Project State
 
-*Last updated: 2026-08-11 (v0.9.2)*
+*Last updated: 2026-08-11 (v0.9.3)*
 *See `docs/RELEASE.md` for deployment instructions.*
 
 ---
@@ -9,7 +9,7 @@
 
 HCC là Bash framework để cài đặt và quản lý Hyprland desktop — đã phát triển từ CLI tool đơn giản thành distro-agnostic system với package abstraction, TOML config, AUR packages, CI/CD, community registry, và TUI interface.
 
-**Current status: v0.9.2 — 64/64 tests passing, đa-distro packaging, self-update theo commit, installed và tested thực tế trên EndeavourOS.**
+**Current status: v0.9.3 — 64/64 tests passing, multi-distro foundation (ID_LIKE + distro TOML blocks), đa-distro packaging, self-update theo commit.**
 
 | Metric | Value |
 |---|---|
@@ -20,7 +20,7 @@ HCC là Bash framework để cài đặt và quản lý Hyprland desktop — đ�
 | Contributors | laosifu |
 | Package managers | 9 (pacman, apt, dnf, zypper, nix, xbps, portage, apk, flatpak) + 4 AUR helpers |
 | AUR packages | hcc-bin (stable), hcc-git (dev) — chờ AUR online |
-| GitHub releases | v0.8.0, v0.9.0, v0.9.2 |
+| GitHub releases | v0.8.0, v0.9.0, v0.9.2, v0.9.3 |
 | Built-in desktop profiles | 2 (mailong2401, end-4) |
 | Community registry entries | 10 |
 | Modules | 23 |
@@ -227,6 +227,7 @@ bash ./bin/hcc        # opens TUI
 
 | Version | Date | Highlights |
 |---|---|---|
+| v0.9.3 | 2026-08-11 | Multi-distro foundation: `pm_detect_distro()` + `ID_LIKE` cho `desktop_package_is_supported()`, TOML đọc `[packages.<distro>]` blocks qua `HCC_DISTRO_ID`/`ID_LIKE`, mở rộng `pm_map_name` cho dnf/zypper/xbps/apk, PKGBUILD sync fix `readlink` + `sha256sums=SKIP` |
 | v0.9.2 `main` | 2026-08-11 | Đa-distro: install.sh tải tarball `main` (không cần AUR/git), CI build `.deb`+`.rpm` gắn Release (`release.yml`), self-update theo commit GitHub thay vì release version, fix `PROJECT_ROOT` qua symlink (`readlink -f`), uninstall menu tick `[x]` + fix `unbound variable` + đổi tên mục 16 "Uninstall HCC", hướng dẫn mở menu sau cài, sync `main` = `master` |
 | v0.9.2 | 2026-08-08 | Fix login/session flow: launcher reads `$HCC_DATA_DIR/profiles/active` (khong con `session-active`), `dm_ensure_launcher()` tu cai launcher khi tao login entry, uninstall 16 items + `0=all`, session naming, sudo gom 1 lan, launcher dung `start-hyprland` |
 | v0.9.1 | 2026-07-28 | (xem release note AUR hcc-bin) |
