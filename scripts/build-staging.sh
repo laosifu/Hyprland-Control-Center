@@ -21,11 +21,13 @@ cat > "$STAGE/usr/bin/hcc" << 'HCC_EOF'
 
 set -euo pipefail
 
-if [[ "$(dirname "${BASH_SOURCE[0]}")" == "/usr/bin" ]]; then
+hcc_self="$(readlink -f "${BASH_SOURCE[0]}")"
+if [[ "$(dirname "$hcc_self")" == "/usr/bin" ]]; then
     PROJECT_ROOT="/usr/share/hcc"
 else
-    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    PROJECT_ROOT="$(cd "$(dirname "$hcc_self")/.." && pwd)"
 fi
+unset hcc_self
 
 if [[ "$(id -u)" -eq 0 && -n "${SUDO_USER:-}" ]]; then
     HCC_REAL_USER="$SUDO_USER"
