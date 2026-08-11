@@ -383,7 +383,7 @@ hcc doctor
 git clone https://github.com/laosifu/Hyprland-Control-Center.git
 cd Hyprland-Control-Center
 
-# Run all 36 tests
+# Run all 64 tests
 bash tests/run_all.sh
 bash tests/run_cli_tests.sh
 ```
@@ -411,7 +411,7 @@ Hyprland-Control-Center/
 ├── handlers/            # Handler wrappers
 ├── dist/aur/            # AUR PKGBUILDs (hcc-bin, hcc-git)
 ├── docs/                # Documentation
-└── tests/               # Test suite (36 tests)
+└── tests/               # Test suite (64 tests)
 ```
 
 ---

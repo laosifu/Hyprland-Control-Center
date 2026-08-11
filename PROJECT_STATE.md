@@ -1,6 +1,6 @@
 # Hyprland Control Center (HCC) — Project State
 
-*Last updated: 2026-08-08 (v0.9.2)*
+*Last updated: 2026-08-11 (v0.9.2)*
 *See `docs/RELEASE.md` for deployment instructions.*
 
 ---
@@ -9,22 +9,23 @@
 
 HCC là Bash framework để cài đặt và quản lý Hyprland desktop — đã phát triển từ CLI tool đơn giản thành distro-agnostic system với package abstraction, TOML config, AUR packages, CI/CD, community registry, và TUI interface.
 
-**Current status: v0.9.2 — 62/62 tests passing, login/session flow fixed, feature-complete for daily use.**
+**Current status: v0.9.2 — 64/64 tests passing, đa-distro packaging, self-update theo commit, installed và tested thực tế trên EndeavourOS.**
 
 | Metric | Value |
 |---|---|
 | Lines of code | 9,099 |
 | Script files | 185 |
-| Tests | 62 (unit + CLI) |
-| Git commits | 48+ |
+| Tests | 64 (unit + CLI) |
+| Git commits | 55+ |
 | Contributors | laosifu |
 | Package managers | 9 (pacman, apt, dnf, zypper, nix, xbps, portage, apk, flatpak) + 4 AUR helpers |
-| AUR packages | hcc-bin (stable), hcc-git (dev) |
-| GitHub releases | v0.8.0, v0.9.0 |
+| AUR packages | hcc-bin (stable), hcc-git (dev) — chờ AUR online |
+| GitHub releases | v0.8.0, v0.9.0, v0.9.2 |
 | Built-in desktop profiles | 2 (mailong2401, end-4) |
 | Community registry entries | 10 |
 | Modules | 23 |
 | Shell completions | bash, fish |
+| Install methods | GitHub tarball (main), .deb, .rpm (CI), AUR, git clone |
 
 ---
 
@@ -187,28 +188,37 @@ Both have `package.toml` (TOML) + `package.conf` (legacy) + `payload/` + `hooks/
 - `.github/workflows/test.yml` — Arch Linux container test + ShellCheck
 - Runs on push/PR to main
 - ShellCheck config: `.shellcheckrc`
-- 62 tests verified on every push
+- 64 tests verified on every push
 
 ---
 
 ## 8. Installation Methods
 
-### AUR (recommended for Arch)
+### One-liner (đa distro, không cần AUR/git)
 ```bash
-yay -S hcc-bin       # stable
-hcc                   # opens TUI
+bash <(curl -sL https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
+hcc                    # opens TUI
+```
+Tải code mới nhất từ branch `main`, ghi vào `~/.local/share/hcc` + symlink `~/.local/bin/hcc`.
+
+### từ GitHub Release (.deb / .rpm — CI tự build mỗi tag)
+```bash
+# Debian/Ubuntu/Mint
+sudo apt install ./hcc_*.deb
+# Fedora/RHEL/openSUSE
+sudo dnf install ./hcc-*.rpm
 ```
 
-### From source
+### AUR (cho Arch, khi AUR online)
+```bash
+yay -S hcc-bin       # stable
+```
+
+### From source (dev)
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center
 cd Hyprland-Control-Center
-bash hcc               # opens TUI
-```
-
-### One-liner
-```bash
-bash <(curl -sL https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
+bash ./bin/hcc        # opens TUI
 ```
 
 ---
@@ -217,6 +227,7 @@ bash <(curl -sL https://raw.githubusercontent.com/laosifu/Hyprland-Control-Cente
 
 | Version | Date | Highlights |
 |---|---|---|
+| v0.9.2 `main` | 2026-08-11 | Đa-distro: install.sh tải tarball `main` (không cần AUR/git), CI build `.deb`+`.rpm` gắn Release (`release.yml`), self-update theo commit GitHub thay vì release version, fix `PROJECT_ROOT` qua symlink (`readlink -f`), uninstall menu tick `[x]` + fix `unbound variable` + đổi tên mục 16 "Uninstall HCC", hướng dẫn mở menu sau cài, sync `main` = `master` |
 | v0.9.2 | 2026-08-08 | Fix login/session flow: launcher reads `$HCC_DATA_DIR/profiles/active` (khong con `session-active`), `dm_ensure_launcher()` tu cai launcher khi tao login entry, uninstall 16 items + `0=all`, session naming, sudo gom 1 lan, launcher dung `start-hyprland` |
 | v0.9.1 | 2026-07-28 | (xem release note AUR hcc-bin) |
 | v0.9.0 | 2026-07-28 | TUI default, self-update, doctor recommendations, config diff, desktop export, AI fallback, Flatpak GUI apps, 10 community profiles, session sudo fix, complete README rewrite |
