@@ -227,7 +227,7 @@ bash ./bin/hcc        # opens TUI
 
 | Version | Date | Highlights |
 |---|---|---|
-| v0.9.3 | 2026-08-11 | Multi-distro foundation: `pm_detect_distro()` + `ID_LIKE` cho `desktop_package_is_supported()`, TOML đọc `[packages.<distro>]` blocks qua `HCC_DISTRO_ID`/`ID_LIKE`, mở rộng `pm_map_name` cho dnf/zypper/xbps/apk, PKGBUILD sync fix `readlink` + `sha256sums=SKIP` |
+| v0.9.3 | 2026-08-11 | Multi-distro foundation: `pm_detect_distro()` + `ID_LIKE` cho `desktop_package_is_supported()`, TOML đọc `[packages.<distro>]` blocks qua `HCC_DISTRO_ID`/`ID_LIKE`, mở rộng `pm_map_name` cho dnf/zypper/xbps/apk, PKGBUILD sync fix `readlink` + `sha256sums=SKIP`, CI test matrix đa-distro (Ubuntu/apt, Fedora/dnf, openSUSE/zypper), Release v0.9.3 build `.deb`+`.rpm` thành công |
 | v0.9.2 `main` | 2026-08-11 | Đa-distro: install.sh tải tarball `main` (không cần AUR/git), CI build `.deb`+`.rpm` gắn Release (`release.yml`), self-update theo commit GitHub thay vì release version, fix `PROJECT_ROOT` qua symlink (`readlink -f`), uninstall menu tick `[x]` + fix `unbound variable` + đổi tên mục 16 "Uninstall HCC", hướng dẫn mở menu sau cài, sync `main` = `master` |
 | v0.9.2 | 2026-08-08 | Fix login/session flow: launcher reads `$HCC_DATA_DIR/profiles/active` (khong con `session-active`), `dm_ensure_launcher()` tu cai launcher khi tao login entry, uninstall 16 items + `0=all`, session naming, sudo gom 1 lan, launcher dung `start-hyprland` |
 | v0.9.1 | 2026-07-28 | (xem release note AUR hcc-bin) |
@@ -256,7 +256,7 @@ bash ./bin/hcc        # opens TUI
 | Symlink overwrite | ✅ Fixed | Xoa symlink truoc `cp -a` |
 | TOML parser bugs | ✅ Fixed | Param name collision, subshell pipe, trailing dot, LIST skip |
 | Session isolation | Removed | Gay login screen freeze |
-| Distro support | ⚠️ Arch-only tested | 9 PMs supported but untested on non-Arch |
+| Distro support | ✅ Multi-distro tested | CI test matrix: Arch/pacman, Ubuntu/apt, Fedora/dnf, openSUSE/zypper |
 | English docs | ⚠️ Partial | README.en.md complete, docs/ trong English |
 
 ---
