@@ -74,13 +74,12 @@ info "[3/6] Cài đặt HCC..."
 
 install_dir="$HOME/.local/share/hcc"
 repo_url="https://github.com/laosifu/Hyprland-Control-Center"
-release_tag="$(curl -fsSL https://api.github.com/repos/laosifu/Hyprland-Control-Center/releases/latest 2>/dev/null | grep -m1 '"tag_name"' | cut -d'"' -f4 || echo "v0.9.2")"
-tarball_url="$repo_url/archive/refs/tags/$release_tag.tar.gz"
+tarball_url="$repo_url/archive/refs/heads/main.tar.gz"
 
 download_release() {
     local tmp_dir
     tmp_dir="$(mktemp -d)"
-    warn "  Đang tải release $release_tag từ GitHub..."
+    warn "  Đang tải code mới nhất (main) từ GitHub..."
     if curl -fsSL "$tarball_url" -o "$tmp_dir/hcc.tar.gz"; then
         tar -xzf "$tmp_dir/hcc.tar.gz" -C "$tmp_dir"
         local src_dir
@@ -88,10 +87,10 @@ download_release() {
         if [[ -n "$src_dir" ]]; then
             mkdir -p "$install_dir"
             cp -a "$src_dir"/. "$install_dir"/
-            local tag_commit
-            tag_commit="$(curl -fsSL "https://api.github.com/repos/laosifu/Hyprland-Control-Center/commits/$release_tag" 2>/dev/null | grep -m1 '"sha"' | cut -d'"' -f4)"
-            if [[ -n "$tag_commit" ]]; then
-                printf '%s\n' "$tag_commit" > "$install_dir/.hcc-commit"
+            local head_commit
+            head_commit="$(curl -fsSL "https://api.github.com/repos/laosifu/Hyprland-Control-Center/commits/main" 2>/dev/null | grep -m1 '"sha"' | cut -d'"' -f4)"
+            if [[ -n "$head_commit" ]]; then
+                printf '%s\n' "$head_commit" > "$install_dir/.hcc-commit"
             fi
             rm -rf "$tmp_dir"
             return 0
@@ -104,19 +103,19 @@ download_release() {
 if [[ -d "$install_dir" ]]; then
     info "  HCC đã có sẵn, đang cập nhật..."
     if ! download_release; then
-        warn "  Không tải được release tarball, thử git pull..."
+        warn "  Không tải được main tarball, thử git pull..."
         git -C "$install_dir" pull --ff-only 2>/dev/null || {
             warn "  Không thể cập nhật tự động. Bạn có thể clone lại thủ công."
         }
     else
-        ok "  Đã cập nhật HCC lên $release_tag"
+        ok "  Đã cập nhật HCC lên code mới nhất (main)"
     fi
 else
     mkdir -p "$(dirname "$install_dir")"
     if download_release; then
-        ok "  Đã cài HCC $release_tag từ GitHub"
+        ok "  Đã cài HCC (main) từ GitHub"
     else
-        warn "  Không tải được release, fallback sang git clone..."
+        warn "  Không tải được main tarball, fallback sang git clone..."
         git clone "$repo_url.git" "$install_dir"
         ok "  Đã clone HCC vào $install_dir"
     fi
