@@ -30,6 +30,44 @@ jobs:
       - name: Run CLI tests
         run: bash tests/run_cli_tests.sh
 
+  multi-distro:
+    name: Test (${{ matrix.distro }} / ${{ matrix.pm }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: "ubuntu:24.04"
+            pm: "apt"
+            install: "apt-get update && apt-get install -y bash git curl sudo python3 which procps util-linux pciutils"
+          - distro: "fedora:40"
+            pm: "dnf"
+            install: "dnf install -y bash git curl sudo python3 which procps-ng util-linux pciutils"
+          - distro: "opensuse/leap:15.6"
+            pm: "zypper"
+            install: "zypper --non-interactive install -y bash git curl sudo python3 which procps util-linux pciutils"
+    container:
+      image: ${{ matrix.distro }}
+    steps:
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify package manager detected
+        run: |
+          source lib/package/detect.sh
+          pm_detect
+          echo "Detected HCC_PM=$HCC_PM (expected ${{ matrix.pm }})"
+          [[ "$HCC_PM" == "${{ matrix.pm }}" ]] || { echo "FAIL: wrong PM"; exit 1; }
+
+      - name: Run unit tests
+        run: bash tests/run_all.sh
+
+      - name: Run CLI tests
+        run: bash tests/run_cli_tests.sh
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:
