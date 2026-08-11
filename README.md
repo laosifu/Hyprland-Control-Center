@@ -55,6 +55,8 @@ bash hcc doctor
 bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
 ```
 
+Tự tải release mới nhất từ GitHub về `~/.local/share/hcc` — không cần AUR.
+
 ---
 
 ## Sử dụng
@@ -323,13 +325,29 @@ yay -S hcc-bin           # Bản stable
 yay -S hcc-git           # Bản phát triển
 ```
 
-### 2. Một lệnh
+### 2. Từ GitHub Release (mọi distro — không cần AUR)
+
+Mỗi release trên GitHub đính kèm gói `.deb` và `.rpm`:
+
+```bash
+# Debian / Ubuntu / Mint
+sudo apt install ./hcc_*.deb
+
+# Fedora / RHEL / openSUSE
+sudo dnf install ./hcc-*.rpm
+```
+
+Tải gói tại <https://github.com/laosifu/Hyprland-Control-Center/releases>.
+
+### 3. Một lệnh
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
 ```
 
-### 3. Clone thủ công
+Tải release mới nhất từ GitHub (không cần git clone, không cần AUR).
+
+### 4. Clone thủ công
 
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center.git
@@ -337,7 +355,7 @@ cd Hyprland-Control-Center
 bash install.sh
 ```
 
-### 4. Chạy trực tiếp (không cần cài)
+### 5. Chạy trực tiếp (không cần cài)
 
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center.git

@@ -88,6 +88,11 @@ download_release() {
         if [[ -n "$src_dir" ]]; then
             mkdir -p "$install_dir"
             cp -a "$src_dir"/. "$install_dir"/
+            local tag_commit
+            tag_commit="$(curl -fsSL "https://api.github.com/repos/laosifu/Hyprland-Control-Center/commits/$release_tag" 2>/dev/null | grep -m1 '"sha"' | cut -d'"' -f4)"
+            if [[ -n "$tag_commit" ]]; then
+                printf '%s\n' "$tag_commit" > "$install_dir/.hcc-commit"
+            fi
             rm -rf "$tmp_dir"
             return 0
         fi

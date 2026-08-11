@@ -55,6 +55,8 @@ bash hcc doctor
 bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
 ```
 
+Downloads the latest release from GitHub to `~/.local/share/hcc` — no AUR needed.
+
 ---
 
 ## Usage
@@ -323,13 +325,29 @@ yay -S hcc-bin           # stable release
 yay -S hcc-git           # development version
 ```
 
-### 2. One-liner installer
+### 2. From GitHub Release (any distro — no AUR needed)
+
+Every GitHub release ships `.deb` and `.rpm` packages:
+
+```bash
+# Debian / Ubuntu / Mint
+sudo apt install ./hcc_*.deb
+
+# Fedora / RHEL / openSUSE
+sudo dnf install ./hcc-*.rpm
+```
+
+Download from <https://github.com/laosifu/Hyprland-Control-Center/releases>.
+
+### 3. One-liner installer
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/laosifu/Hyprland-Control-Center/main/install.sh)
 ```
 
-### 3. Manual clone
+Downloads the latest release tarball from GitHub (no git clone, no AUR).
+
+### 4. Manual clone
 
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center.git
@@ -337,7 +355,7 @@ cd Hyprland-Control-Center
 bash install.sh
 ```
 
-### 4. Run without installing
+### 5. Run without installing
 
 ```bash
 git clone https://github.com/laosifu/Hyprland-Control-Center.git
